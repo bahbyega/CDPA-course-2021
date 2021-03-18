@@ -27,7 +27,7 @@ $ ./build.sh <build target (optional)>
 - `Clean` - removes all the object files that had been created, so you could do the fresh build.
 
 ### Run
-After you build the application you can run it with:
+After you built the application you can run it with:
 ```
 $ ./src/hw-1/build/out
 ```
@@ -36,8 +36,6 @@ $ ./src/hw-1/build/out
 
 ### Task 1.1
 
-> Реализовать приложение с графическим интерфейсом пользователя, позво-
-ляющее открыть папку с изображениями, выбрать изображение, просмотреть его, про-
-смотреть информацию о нём (размер в пикселях, размер в мегабайтах).
+> Реализовать приложение с графическим интерфейсом пользователя, позволяющее открыть папку с изображениями, выбрать изображение, просмотреть его, просмотреть информацию о нём (размер в пикселях, размер в мегабайтах).
 
 ---
