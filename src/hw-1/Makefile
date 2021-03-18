@@ -5,16 +5,22 @@ LIBS	= -lm `pkg-config --libs gtk+-3.0`
 
 BUILD_DIR = build
 OBJ_DIR = obj
+GUI_COMP_DIR = gui_components
 TARGET  = out
 
-DIR_GUARD = @mkdir -p $(BUILD_DIR)/$(OBJ_DIR)/
+DIR_GUARD = @mkdir -p $(BUILD_DIR)/$(OBJ_DIR)/$(GUI_COMP_DIR)
 
-SOURCES := $(wildcard *.c)
+SOURCES := $(shell find . -name '*.c')
 OBJECTS := $(patsubst %.c,$(BUILD_DIR)/$(OBJ_DIR)/%.o,$(SOURCES))
 DEPS=$(OBJECTS:.o=.d)
 
 # Compile
 $(BUILD_DIR)/$(OBJ_DIR)/%.o: %.c
+	$(DIR_GUARD)
+	@echo "Compiling $^:"
+	$(CC) -c $< -o $@ $(CFLAGS)
+
+$(BUILD_DIR)/$(OBJ_DIR)/$(GUI_COMP_DIR)/%.o: %.c
 	$(DIR_GUARD)
 	@echo "Compiling $^:"
 	$(CC) -c $< -o $@ $(CFLAGS)
