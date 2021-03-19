@@ -1,9 +1,8 @@
 #include "gui-window.h"
 
-
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
-    GtkWidget  *window;
+    GtkWidget *window;
 
     gtk_init(&argc, &argv);
 
@@ -11,9 +10,8 @@ int main (int argc, char **argv)
     initialize_window(window);
 
     gtk_widget_show_all(window);
-    
+
     gtk_main();
 
     return 0;
 }
-

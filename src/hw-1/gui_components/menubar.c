@@ -27,12 +27,11 @@ void setup_menu_bar_on_main_window(GtkWidget *menu_bar)
     g_signal_connect(G_OBJECT(open_item), "activate",
                      G_CALLBACK(on_open_menu_item_click), menu_bar);
 
-    g_signal_connect(G_OBJECT(exit_item), "activate",
-                     G_CALLBACK(gtk_main_quit), NULL);
-    
+    g_signal_connect(G_OBJECT(exit_item), "activate", G_CALLBACK(gtk_main_quit),
+                     NULL);
+
     g_signal_connect(G_OBJECT(github_item), "activate",
                      G_CALLBACK(open_github_page), NULL);
-
 }
 
 void open_github_page()
@@ -41,7 +40,8 @@ void open_github_page()
     system("xdg-open https://github.com/bahbyega/CDPA-course-2021");
 }
 
-void on_open_menu_item_click(GtkWidget *caller __attribute__((unused)), gpointer menu_bar)
+void on_open_menu_item_click(GtkWidget *caller __attribute__((unused)),
+                             gpointer menu_bar)
 {
     // i have to pass a pointer to GtkWidget as a first argument
     // in this event handler function, and to remove compiler warning
