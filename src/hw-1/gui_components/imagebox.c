@@ -13,7 +13,7 @@ void setup_image_on_main_window(GtkWidget *image_box, GtkWidget *image,
 
     // use this struct to pass data to the event handler below
     ResizeImage *image_to_resize;
-    image_to_resize = (ResizeImage *)malloc(sizeof(*image_to_resize));
+    image_to_resize = (ResizeImage *)calloc(1, sizeof(*image_to_resize));
     image_to_resize->image = image;
     image_to_resize->pixbuf = image_pixbuf;
 
