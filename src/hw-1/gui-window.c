@@ -8,12 +8,21 @@
 
 void initialize_window (GtkWidget *window)   
 {
+    GdkMonitor *monitor;
+    gint w_width;
+    gint w_height;
+    GdkRectangle workarea;
+
     GtkWidget *init_btn;
 
+    monitor = gdk_display_get_primary_monitor(gdk_display_get_default());
+    gdk_monitor_get_workarea(monitor, &workarea);
+    w_width = workarea.width / 2;
+    w_height = workarea.height / 2;
+    
+    gtk_window_set_default_size(GTK_WINDOW (window), w_width, w_height);
     gtk_window_set_type_hint   (GTK_WINDOW (window), GDK_WINDOW_TYPE_HINT_DIALOG);
     gtk_window_set_title       (GTK_WINDOW (window), "Filters application");
-    
-    gtk_window_move(GTK_WINDOW(window), 700, 400);
 
     g_signal_connect(G_OBJECT(window), "destroy",
                      G_CALLBACK (gtk_main_quit), NULL);
@@ -90,10 +99,6 @@ void setup_window_layout_elements (GtkWidget *window, GdkPixbuf *pixbuf, gulong 
     GtkWidget *menu_bar  = gtk_menu_bar_new();
     GtkWidget *grid      = gtk_grid_new();
 
-    
-    setup_listbox_on_main_window(info_lbox, image, i_size);
-    setup_menu_bar_on_main_window(menu_bar);
-
     gtk_layout_put(GTK_LAYOUT(image_box), image, 0, 0);
    
     gtk_grid_attach(GTK_GRID(grid), menu_bar, 0, 0, 2, 1);
@@ -107,12 +112,12 @@ void setup_window_layout_elements (GtkWidget *window, GdkPixbuf *pixbuf, gulong 
                                            info_lbox,
                                            GTK_POS_RIGHT,
                                            1, 1);
-    gtk_container_add(GTK_CONTAINER(window), grid);
     
+    gtk_container_add(GTK_CONTAINER(window), grid);
 
+    setup_listbox_on_main_window(info_lbox, image, i_size);
+    setup_menu_bar_on_main_window(menu_bar);
     setup_image_on_main_window(image_box, image, pixbuf);
-    //gtk_window_resize(GTK_WINDOW(window), 100, 50);
-    gtk_window_move(GTK_WINDOW(window), 700, 400);
 }
 
 gulong get_file_size(gchar *filename)
