@@ -52,4 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Build
-build/*
+build/
+
+# Editor
+.vscode/
