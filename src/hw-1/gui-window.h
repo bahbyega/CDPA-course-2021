@@ -8,6 +8,7 @@
 #include "gui_components/imagebox.h"
 #include "gui_components/listbox.h"
 #include "gui_components/menubar.h"
+#include "gui_components/filterspanel.h"
 
 void initialize_window(GtkWidget *);
 void setup_init_button(GtkWidget *);
