@@ -60,7 +60,7 @@ void resize_image_keeping_aspect_ratio(GtkWidget *image_box,
 
     if (width < alloc_width)
     {
-        x_coord = (alloc_width - width) / 2;
+        x_coord = (alloc_width - width) / 4;
         gtk_layout_move(GTK_LAYOUT(image_box), image, x_coord, y_coord);
     }
 

@@ -95,20 +95,20 @@ void setup_window_layout_elements(GtkWidget *window, GdkPixbuf *pixbuf,
         gtk_layout_new(0, 0); // need a wrapper for image resizing
     GtkWidget *info_lbox = gtk_list_box_new();
     GtkWidget *menu_bar = gtk_menu_bar_new();
-    GtkWidget *filters_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget *filters_container = gtk_notebook_new();
     GtkWidget *grid = gtk_grid_new();
 
     gtk_layout_put(GTK_LAYOUT(image_box), image, 0, 0);
 
     gtk_grid_attach(GTK_GRID(grid), menu_bar, 0, 0, 2, 1);
 
-    gtk_grid_attach_next_to(GTK_GRID(grid), info_lbox, menu_bar, GTK_POS_BOTTOM,
+    gtk_grid_attach_next_to(GTK_GRID(grid), filters_container, menu_bar, GTK_POS_BOTTOM,
                             1, 1);
 
-    gtk_grid_attach_next_to(GTK_GRID(grid), image_box, info_lbox, GTK_POS_RIGHT,
-                            1, 1);
+    gtk_grid_attach_next_to(GTK_GRID(grid), image_box, filters_container, GTK_POS_RIGHT,
+                            1, 2);
 
-    gtk_grid_attach_next_to(GTK_GRID(grid), filters_box, image_box, GTK_POS_RIGHT,
+    gtk_grid_attach_next_to(GTK_GRID(grid), info_lbox, filters_container, GTK_POS_BOTTOM,
                             1, 1);
 
     gtk_container_add(GTK_CONTAINER(window), grid);
@@ -116,7 +116,7 @@ void setup_window_layout_elements(GtkWidget *window, GdkPixbuf *pixbuf,
     setup_listbox_on_main_window(info_lbox, image, i_size);
     setup_menu_bar_on_main_window(menu_bar);
     setup_image_on_main_window(image_box, image, pixbuf);
-    setup_filters_on_main_window(filters_box, pixbuf);
+    setup_filters_on_main_window(filters_container, pixbuf);
 }
 
 gulong get_file_size(gchar *filename)
