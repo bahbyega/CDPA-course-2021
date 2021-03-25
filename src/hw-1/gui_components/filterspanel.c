@@ -181,13 +181,19 @@ void show_resulting_image_in_new_window(GdkPixbuf *pixbuf)
 {
     GtkWidget *res_window;
     GtkWidget *image;
+    GtkWidget *image_box;
 
     res_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(res_window), "Filtering result");
-    gtk_window_set_default_size(GTK_WINDOW(res_window), 320, 200);
+    gtk_window_set_default_size(GTK_WINDOW(res_window), 700, 400);
+    gtk_window_set_type_hint(GTK_WINDOW(res_window), GDK_WINDOW_TYPE_HINT_DIALOG);
 
-    image = gtk_image_new_from_pixbuf(pixbuf);
-    gtk_container_add(GTK_CONTAINER(res_window), image);
+    image = gtk_image_new();
+    image_box = gtk_layout_new(0, 0);
+
+    gtk_layout_put(GTK_LAYOUT(image_box), image, 0, 0);
+    gtk_container_add(GTK_CONTAINER(res_window), image_box);
+    setup_image_on_main_window(image_box, image, pixbuf);
 
     gtk_widget_show_all(res_window);
 }

@@ -4,6 +4,7 @@
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
+#include "imagebox.h"
 #include "../filters.h"
 
 void setup_filters_on_main_window(GtkWidget *, GdkPixbuf *);
