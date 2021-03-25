@@ -16,6 +16,7 @@ void on_flip_y_btn_click(GtkWidget *, gpointer );
 void on_blur_btn_click(GtkWidget *, gpointer );
 void on_sharp_btn_click(GtkWidget *, gpointer );
 void on_edges_btn_click(GtkWidget *, gpointer );
+void on_mblur_btn_click(GtkWidget *, gpointer );
 
 void show_resulting_image_in_new_window(GdkPixbuf *);
 

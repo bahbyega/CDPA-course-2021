@@ -25,12 +25,14 @@ GtkWidget *setup_predefined_filters_page(GdkPixbuf *pixbuf)
     GtkWidget *blur_btn   = gtk_button_new_with_label("Apply gaus blur");
     GtkWidget *sharp_btn  = gtk_button_new_with_label("Apply sharpening");
     GtkWidget *edge_btn   = gtk_button_new_with_label("Apply finding edges");
+    GtkWidget *mblur_btn  = gtk_button_new_with_label("Apply motion blur");
 
     gtk_box_pack_start(GTK_BOX(box), flip_x_btn, TRUE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box), flip_y_btn, TRUE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box), blur_btn, TRUE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box), sharp_btn, TRUE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box), edge_btn, TRUE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(box), mblur_btn, TRUE, FALSE, 5);
 
     g_signal_connect(G_OBJECT(flip_x_btn), "clicked", G_CALLBACK(on_flip_x_btn_click),
                      pixbuf);
@@ -41,6 +43,8 @@ GtkWidget *setup_predefined_filters_page(GdkPixbuf *pixbuf)
     g_signal_connect(G_OBJECT(sharp_btn), "clicked", G_CALLBACK(on_sharp_btn_click),
                      pixbuf);
     g_signal_connect(G_OBJECT(edge_btn), "clicked", G_CALLBACK(on_edges_btn_click),
+                     pixbuf);
+    g_signal_connect(G_OBJECT(mblur_btn), "clicked", G_CALLBACK(on_mblur_btn_click),
                      pixbuf);
     
     return box;
@@ -155,6 +159,23 @@ void on_edges_btn_click(GtkWidget *caller
     
     show_resulting_image_in_new_window(res_image);
 }
+
+void on_mblur_btn_click(GtkWidget *caller
+                        __attribute__((unused)), 
+                        gpointer data)
+{
+    double *kernel = &motionblur_kernel_9x9[0][0];
+    gint    ker_width = 9, ker_height = 9;
+    double  factor = 1/9.00, bias = 0.0;
+
+    GdkPixbuf *res_image = apply_filter((GdkPixbuf *)data,
+                                        kernel,
+                                        ker_width, ker_height,
+                                        factor, bias);
+    
+    show_resulting_image_in_new_window(res_image);
+}
+
 
 void show_resulting_image_in_new_window(GdkPixbuf *pixbuf)
 {

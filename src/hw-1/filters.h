@@ -11,6 +11,7 @@ extern double edges_kernel_3x3[3][3];
 extern double edges_kernel_5x5[5][5];
 extern double sharpening_kernel_3x3[3][3];
 extern double sharpening_kernel_5x5[5][5];
+extern double motionblur_kernel_9x9[9][9];
 
 GdkPixbuf *apply_flip(GdkPixbuf *, gboolean);
 GdkPixbuf *apply_filter(const GdkPixbuf *, 
