@@ -96,7 +96,7 @@ void on_flip_x_btn_click(GtkWidget *caller
                          __attribute__((unused)), 
                          gpointer data)
 {
-    GdkPixbuf *res_image = apply_flip_on_x_axis((GdkPixbuf *)data);
+    GdkPixbuf *res_image = apply_flip((GdkPixbuf *)data, TRUE);
     show_resulting_image_in_new_window(res_image);
 }
 
@@ -104,7 +104,7 @@ void on_flip_y_btn_click(GtkWidget *caller
                          __attribute__((unused)), 
                          gpointer data)
 {
-    GdkPixbuf *res_image = apply_flip_on_y_axis((GdkPixbuf *)data);
+    GdkPixbuf *res_image = apply_flip((GdkPixbuf *)data, FALSE);
     show_resulting_image_in_new_window(res_image);
 }
 
@@ -112,9 +112,15 @@ void on_blur_btn_click(GtkWidget *caller
                        __attribute__((unused)), 
                        gpointer data)
 {
-    GdkPixbuf *res_image = apply_filter_5_size((GdkPixbuf *)data,
-                                        gaussian_blur_kernel_5x5,
-                                        1/256.00, 0.0);
+    double *kernel = &gaussian_blur_kernel_5x5[0][0];
+    gint    ker_width = 5, ker_height = 5;
+    double  factor = 1/256.0, bias = 0.0;
+
+    GdkPixbuf *res_image = apply_filter((GdkPixbuf *)data,
+                                        kernel,
+                                        ker_width, ker_height,
+                                        factor, bias);
+    
     show_resulting_image_in_new_window(res_image);
 }
 
@@ -122,9 +128,15 @@ void on_sharp_btn_click(GtkWidget *caller
                         __attribute__((unused)), 
                         gpointer data)
 {
-    GdkPixbuf *res_image = apply_filter_5_size((GdkPixbuf *)data,
-                                        sharpening_kernel_5x5,
-                                        1.0, 0.0);
+    double *kernel = &sharpening_kernel_5x5[0][0];
+    gint    ker_width = 5, ker_height = 5;
+    double  factor = 1/9.0, bias = 0.0;
+
+    GdkPixbuf *res_image = apply_filter((GdkPixbuf *)data,
+                                        kernel,
+                                        ker_width, ker_height,
+                                        factor, bias);
+    
     show_resulting_image_in_new_window(res_image);
 }
 
@@ -132,9 +144,15 @@ void on_edges_btn_click(GtkWidget *caller
                         __attribute__((unused)), 
                         gpointer data)
 {
-    GdkPixbuf *res_image = apply_filter_5_size((GdkPixbuf *)data,
-                                        edges_kernel_5x5,
-                                        1.0, 0.0);
+    double *kernel = &edges_kernel_5x5[0][0];
+    gint    ker_width = 5, ker_height = 5;
+    double  factor = 1.00, bias = 0.0;
+
+    GdkPixbuf *res_image = apply_filter((GdkPixbuf *)data,
+                                        kernel,
+                                        ker_width, ker_height,
+                                        factor, bias);
+    
     show_resulting_image_in_new_window(res_image);
 }
 
