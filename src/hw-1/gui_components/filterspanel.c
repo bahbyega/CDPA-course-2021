@@ -59,39 +59,58 @@ GtkWidget *setup_custom_filters_page(GdkPixbuf *pixbuf __attribute__((unused)))
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_type_box), 0, "Sharpening");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_type_box), 0, "Edge detection");
 
-    GtkAdjustment *config = gtk_adjustment_new(1, 3, 5, 2, 0, 0);
-    GtkWidget *size_btn = gtk_spin_button_new(config, 1.0, 0);
+    GtkAdjustment *size_config = gtk_adjustment_new(1, 3, 5, 2, 0, 0);
+    GtkWidget     *size_btn    = gtk_spin_button_new(size_config, 1.0, 0);
 
     const gchar *info_text = "Please select filter type\n"
                              "and filter size. That will\n"
                              "generate default filter\n"
                              "values in box below. \n"
-                             "Also, specify weight and\n"
+                             "Also, specify factor and\n"
                              "bias below. When ready \n"
-                             "press apply.";
+                             "press apply.\n";
     GtkWidget *info_label = gtk_label_new(info_text);
 
-    /*GtkWidget *values_entry = gtk_text_view_new();
-    GtkTextBuffer *text_buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(values_entry));
-    gtk_text_view_set_editable(GTK_TEXT_VIEW(values_entry), TRUE);
-    gtk_text_buffer_create_tag(text_buf, "blue_fg", "foreground", "blue", NULL); 
-    gtk_text_buffer_insert_with_tags_by_name(text_buf, NULL, 
-        info_text, -1, "blue_fg",  NULL);*/
+    GtkWidget *values_entry = gtk_entry_new();
+    gtk_editable_set_editable(GTK_EDITABLE(values_entry), TRUE);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(values_entry), "Default values");
 
-    GtkWidget *weight_entry = gtk_entry_new();
-    GtkWidget *bias_entry   = gtk_entry_new();
-    GtkWidget *apply_btn    = gtk_button_new_with_label("Apply filter");
+    GtkWidget *type_label = gtk_label_new ("Filter type:");
+    GtkWidget *size_label = gtk_label_new ("Filter size:");
+    GtkWidget *factor_label = gtk_label_new ("Weight (factor):");
+    GtkWidget *bias_label = gtk_label_new ("Bias (brightness):");
+
+    GtkAdjustment *factor_config = gtk_adjustment_new(1.0, 0.0, 5.0, 0.0000001, 0.00001, 0);
+    GtkWidget     *factor_btn    = gtk_spin_button_new(factor_config, 1.0, 7);
+    GtkAdjustment *bias_config   = gtk_adjustment_new(0, 0, 255, 1, 5, 0);
+    GtkWidget     *bias_btn      = gtk_spin_button_new(bias_config, 1.0, 0);
     
-    gtk_entry_set_placeholder_text(GTK_ENTRY(weight_entry), "Weight (0.0 - 1.0)");
-    gtk_entry_set_placeholder_text(GTK_ENTRY(bias_entry), "Bias (0 - 255)");
+    GtkWidget *apply_btn = gtk_button_new_with_label("Apply filter");
 
-    gtk_box_pack_start(GTK_BOX(box), filter_type_box, TRUE, FALSE, 5);
-    gtk_box_pack_start(GTK_BOX(box), size_btn, TRUE, FALSE, 5);
-    gtk_box_pack_start(GTK_BOX(box), info_label, TRUE, FALSE, 5);
-    //gtk_box_pack_start(GTK_BOX(box), values_entry, TRUE, FALSE, 5);
-    gtk_box_pack_start(GTK_BOX(box), weight_entry, TRUE, FALSE, 5);
-    gtk_box_pack_start(GTK_BOX(box), bias_entry, TRUE, FALSE, 5);
-    gtk_box_pack_start(GTK_BOX(box), apply_btn, TRUE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(box), type_label, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box), filter_type_box, TRUE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), size_label, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box), size_btn, TRUE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), info_label, TRUE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), values_entry, TRUE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), factor_label, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box), factor_btn, TRUE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), bias_label, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box), bias_btn, TRUE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), apply_btn, TRUE, FALSE, 0);
+
+    // initialize widgets' data and pass it to callback
+    CustomFilterData *data;
+    data = (CustomFilterData *)calloc(1, sizeof(*data));
+    
+    data->pixbuf    = pixbuf;
+    data->kernel    = &edges_kernel_5x5[0][0]; // TODO: kernel needs to be selected and filled by user
+    data->size_btn  = GTK_SPIN_BUTTON(size_btn);
+    data->factor_btn= GTK_SPIN_BUTTON(factor_btn);
+    data->bias_btn  = GTK_SPIN_BUTTON(bias_btn);
+
+    g_signal_connect(G_OBJECT(apply_btn), "clicked", G_CALLBACK(on_apply_btn_click),
+                     data);
 
     return box;
 }
@@ -176,6 +195,26 @@ void on_mblur_btn_click(GtkWidget *caller
     show_resulting_image_in_new_window(res_image);
 }
 
+void on_apply_btn_click(GtkWidget *caller
+                        __attribute__((unused)), 
+                        gpointer data)
+{
+    CustomFilterData *d = (CustomFilterData *)data;
+
+    GdkPixbuf *pixbuf = d->pixbuf;
+    double    *kernel = d->kernel;
+    gint       ker_width = gtk_spin_button_get_value_as_int(d->size_btn);
+    gint       ker_height = gtk_spin_button_get_value_as_int(d->size_btn);
+    double     factor = gtk_spin_button_get_value(d->factor_btn);
+    double     bias = gtk_spin_button_get_value(d->bias_btn);
+
+    GdkPixbuf *res_image = apply_filter(pixbuf,
+                                        kernel,
+                                        ker_width, ker_height,
+                                        factor, bias);
+    
+    show_resulting_image_in_new_window(res_image);
+}
 
 void show_resulting_image_in_new_window(GdkPixbuf *pixbuf)
 {
