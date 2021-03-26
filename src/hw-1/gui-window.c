@@ -45,6 +45,7 @@ void setup_init_button(GtkWidget *button)
 void on_init_btn_click(GtkWidget *widget)
 {
     GtkWidget *dialog;
+    GtkFileFilter *filter;
     GtkWidget *window = gtk_widget_get_toplevel(widget);
     gint res;
 
@@ -53,6 +54,10 @@ void on_init_btn_click(GtkWidget *widget)
     dialog = gtk_file_chooser_dialog_new(
         "Choose an image", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN,
         "_OK", GTK_RESPONSE_OK, "_Cancel", GTK_RESPONSE_CANCEL, NULL);
+    
+    filter = gtk_file_filter_new();
+    gtk_file_filter_add_pixbuf_formats(filter);
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
 
     res = gtk_dialog_run(GTK_DIALOG(dialog));
 
