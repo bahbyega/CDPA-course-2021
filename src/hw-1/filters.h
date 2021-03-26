@@ -16,4 +16,9 @@ GdkPixbuf *apply_filter(const GdkPixbuf *,
                                 gint, gint,
                                 double, double);
 
+GdkPixbuf *apply_filter_parallel(const GdkPixbuf *, 
+                                double *kernel,
+                                gint, gint,
+                                double, double);
+
 #endif /* __FILTERS__ */

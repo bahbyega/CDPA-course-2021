@@ -181,11 +181,11 @@ void on_blur_btn_click(GtkWidget *caller
     gint    ker_width = 5, ker_height = 5;
     double  factor = 1/256.0, bias = 0.0;
 
-    GdkPixbuf *res_image = apply_filter((GdkPixbuf *)data,
+    GdkPixbuf *res_image = apply_filter_parallel((GdkPixbuf *)data,
                                         kernel,
                                         ker_width, ker_height,
                                         factor, bias);
-    
+
     show_resulting_image_in_new_window(res_image);
 }
 
@@ -197,11 +197,11 @@ void on_sharp_btn_click(GtkWidget *caller
     gint    ker_width = 5, ker_height = 5;
     double  factor = 1/9.0, bias = 0.0;
 
-    GdkPixbuf *res_image = apply_filter((GdkPixbuf *)data,
+    GdkPixbuf *res_image = apply_filter_parallel((GdkPixbuf *)data,
                                         kernel,
                                         ker_width, ker_height,
                                         factor, bias);
-    
+                            
     show_resulting_image_in_new_window(res_image);
 }
 
@@ -213,11 +213,11 @@ void on_edges_btn_click(GtkWidget *caller
     gint    ker_width = 5, ker_height = 5;
     double  factor = 1.00, bias = 0.0;
 
-    GdkPixbuf *res_image = apply_filter((GdkPixbuf *)data,
+    GdkPixbuf *res_image = apply_filter_parallel((GdkPixbuf *)data,
                                         kernel,
                                         ker_width, ker_height,
                                         factor, bias);
-    
+     
     show_resulting_image_in_new_window(res_image);
 }
 
@@ -229,11 +229,11 @@ void on_mblur_btn_click(GtkWidget *caller
     gint    ker_width = 9, ker_height = 9;
     double  factor = 1/9.00, bias = 0.0;
 
-    GdkPixbuf *res_image = apply_filter((GdkPixbuf *)data,
+    GdkPixbuf *res_image = apply_filter_parallel((GdkPixbuf *)data,
                                         kernel,
                                         ker_width, ker_height,
                                         factor, bias);
-    
+
     show_resulting_image_in_new_window(res_image);
 }
 
@@ -251,7 +251,7 @@ void on_apply_btn_click(GtkWidget *caller
     double     factor = gtk_spin_button_get_value(d->factor_btn);
     double     bias = gtk_spin_button_get_value(d->bias_btn);
 
-    GdkPixbuf *res_image = apply_filter(pixbuf,
+    GdkPixbuf *res_image = apply_filter_parallel(pixbuf,
                                         kernel,
                                         ker_width, ker_height,
                                         factor, bias);

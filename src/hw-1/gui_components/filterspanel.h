@@ -3,7 +3,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
-
+#include <sys/time.h>
 #include "imagebox.h"
 #include "../filters.h"
 
