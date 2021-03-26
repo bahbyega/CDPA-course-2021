@@ -13,6 +13,10 @@ enum
 #define EDGES_KERNEL_STR      "{0, -1, 0},{-1, 4, -1},{0, -1, 0}"
 #define DEFAULT_KERNEL_STR    "{0, 0, 0},{0, 1, 0},{0, 0, 0}"
 
+/** 
+ * Sets up filters panel on main window. It consists of a notebook
+ * with two pages. Each page is then configured in other functions.
+ **/
 void setup_filters_on_main_window(GtkWidget *notebook, GdkPixbuf *pixbuf)
 {
     GtkWidget *predefined_page = setup_predefined_filters_page(pixbuf);
@@ -29,6 +33,10 @@ void setup_filters_on_main_window(GtkWidget *notebook, GdkPixbuf *pixbuf)
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), custom_page, custom_label);
 }
 
+/**
+ * Configures page with predefined filters. These filters are 5x5
+ * matrices which configured in filters.c file.
+ **/
 GtkWidget *setup_predefined_filters_page(GdkPixbuf *pixbuf)
 {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
@@ -63,6 +71,9 @@ GtkWidget *setup_predefined_filters_page(GdkPixbuf *pixbuf)
     return box;
 }
 
+/**
+ * Configures page where you can specify your custom filter.
+ **/
 GtkWidget *setup_custom_filters_page(GdkPixbuf *pixbuf __attribute__((unused)))
 {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -135,6 +146,7 @@ GtkWidget *setup_custom_filters_page(GdkPixbuf *pixbuf __attribute__((unused)))
     return box;
 }
 
+/* event handlers */
 void on_filter_type_change(GtkWidget *caller, 
                            gpointer data)
 {
@@ -247,6 +259,10 @@ void on_apply_btn_click(GtkWidget *caller
     show_resulting_image_in_new_window(res_image);
 }
 
+/**
+ * It gets called for generating default value in entry box.
+ * Returns one of the predefined string literals.
+ **/
 const char *generate_default_kernel_str(gint id)
 {
     switch (id)
@@ -269,6 +285,12 @@ const char *generate_default_kernel_str(gint id)
     }
 }
 
+/** 
+ * Helper function for next function.
+ * Parameter 'str' is a string representing a kernel.
+ * This function basically parses a string with
+ * kernel values and stores them in 'res' parameter.
+ **/
 void split_string(char *str, double *res, gint width, gint height)
 {
     const char delim[] = " {},[]";
@@ -300,6 +322,13 @@ void split_string(char *str, double *res, gint width, gint height)
     }
 }
 
+/**
+ * Allocates memory for a user specified kernel and returns
+ * a pointer to its first element. Width and Height are also user
+ * specified. And it's not checked anywhere if kernel size matches 
+ * with width and height. So it is on user to make them the same.
+ * But if they don't match the difference is only in 0s in the kernel.
+ **/
 double *parse_kernelstr_for_kernel(const char *str, gint width, gint height)
 {
     double *res = (double *)calloc(width*height, sizeof(double));
@@ -311,6 +340,9 @@ double *parse_kernelstr_for_kernel(const char *str, gint width, gint height)
     return &res[0];
 }
 
+/**
+ * Just shows the resulting image.
+ **/
 void show_resulting_image_in_new_window(GdkPixbuf *pixbuf)
 {
     GtkWidget *res_window;
