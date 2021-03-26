@@ -1,5 +1,18 @@
 #include "filterspanel.h"
 
+enum 
+{
+    FILTER_ID_NONE = 0,
+    FILTER_ID_GAUSBLUR = 1,
+    FILTER_ID_SHARPENING = 2,
+    FILTER_ID_EDGES = 3
+};
+
+#define GAUS_BLUR_KERNEL_STR  "{0.0, 0.2, 0.0},{0.2, 0.2, 0.2},{0.0, 0.2, 0.0}"
+#define SHARPENING_KERNEL_STR "{-1, -1, -1},{-1, 9, -1},{-1, -1, -1}"
+#define EDGES_KERNEL_STR      "{0, -1, 0},{-1, 4, -1},{0, -1, 0}"
+#define DEFAULT_KERNEL_STR    "{0, 0, 0},{0, 1, 0},{0, 0, 0}"
+
 void setup_filters_on_main_window(GtkWidget *notebook, GdkPixbuf *pixbuf)
 {
     GtkWidget *predefined_page = setup_predefined_filters_page(pixbuf);
@@ -55,25 +68,29 @@ GtkWidget *setup_custom_filters_page(GdkPixbuf *pixbuf __attribute__((unused)))
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
     GtkWidget *filter_type_box = gtk_combo_box_text_new_with_entry();
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_type_box), 0, "None");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_type_box), 0, "Blur");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_type_box), 0, "Sharpening");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_type_box), 0, "Edge detection");
 
-    GtkAdjustment *size_config = gtk_adjustment_new(1, 3, 5, 2, 0, 0);
+    GtkAdjustment *size_config = gtk_adjustment_new(3, 1, 9, 2, 0, 0);
     GtkWidget     *size_btn    = gtk_spin_button_new(size_config, 1.0, 0);
 
-    const gchar *info_text = "Please select filter type\n"
-                             "and filter size. That will\n"
-                             "generate default filter\n"
-                             "values in box below. \n"
-                             "Also, specify factor and\n"
-                             "bias below. When ready \n"
-                             "press apply.\n";
+    const gchar *info_text = "Select filter type. That\n"
+                             "will generate values in box\n"
+                             "below. You can set up your\n"
+                             "own kernel values, but make\n"
+                             "sure that kernel size matches\n"
+                             "value in filter size box.\n"
+                             "Basically, a kernel is an \n"
+                             "array of doubles, so you can\n"
+                             "input this array in any form.\n"
+                             "{{a,b},{c,d}} is preffered.\n"
+                             "When ready press apply.";
     GtkWidget *info_label = gtk_label_new(info_text);
 
     GtkWidget *values_entry = gtk_entry_new();
-    gtk_editable_set_editable(GTK_EDITABLE(values_entry), TRUE);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(values_entry), "Default values");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(values_entry), "Default values (zeros now)");
 
     GtkWidget *type_label = gtk_label_new ("Filter type:");
     GtkWidget *size_label = gtk_label_new ("Filter size:");
@@ -82,7 +99,7 @@ GtkWidget *setup_custom_filters_page(GdkPixbuf *pixbuf __attribute__((unused)))
 
     GtkAdjustment *factor_config = gtk_adjustment_new(1.0, 0.0, 5.0, 0.0000001, 0.00001, 0);
     GtkWidget     *factor_btn    = gtk_spin_button_new(factor_config, 1.0, 7);
-    GtkAdjustment *bias_config   = gtk_adjustment_new(0, 0, 255, 1, 5, 0);
+    GtkAdjustment *bias_config   = gtk_adjustment_new(0, -255, 255, 1, 5, 0);
     GtkWidget     *bias_btn      = gtk_spin_button_new(bias_config, 1.0, 0);
     
     GtkWidget *apply_btn = gtk_button_new_with_label("Apply filter");
@@ -99,20 +116,33 @@ GtkWidget *setup_custom_filters_page(GdkPixbuf *pixbuf __attribute__((unused)))
     gtk_box_pack_start(GTK_BOX(box), bias_btn, TRUE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(box), apply_btn, TRUE, FALSE, 0);
 
+    g_signal_connect(G_OBJECT(filter_type_box), "changed", G_CALLBACK(on_filter_type_change),
+                     values_entry);
+
     // initialize widgets' data and pass it to callback
     CustomFilterData *data;
     data = (CustomFilterData *)calloc(1, sizeof(*data));
     
     data->pixbuf    = pixbuf;
-    data->kernel    = &edges_kernel_5x5[0][0]; // TODO: kernel needs to be selected and filled by user
+    data->values_entry = GTK_ENTRY(values_entry);
     data->size_btn  = GTK_SPIN_BUTTON(size_btn);
     data->factor_btn= GTK_SPIN_BUTTON(factor_btn);
     data->bias_btn  = GTK_SPIN_BUTTON(bias_btn);
 
     g_signal_connect(G_OBJECT(apply_btn), "clicked", G_CALLBACK(on_apply_btn_click),
                      data);
-
+    
     return box;
+}
+
+void on_filter_type_change(GtkWidget *caller, 
+                           gpointer data)
+{
+    gint filter_type_id = gtk_combo_box_get_active(GTK_COMBO_BOX(caller));
+
+    const char *kernel_str = generate_default_kernel_str(filter_type_id);
+
+    gtk_entry_set_text(GTK_ENTRY(data), kernel_str);
 }
 
 void on_flip_x_btn_click(GtkWidget *caller
@@ -200,11 +230,12 @@ void on_apply_btn_click(GtkWidget *caller
                         gpointer data)
 {
     CustomFilterData *d = (CustomFilterData *)data;
+    const char *kernelstr = gtk_entry_get_text(d->values_entry);
 
     GdkPixbuf *pixbuf = d->pixbuf;
-    double    *kernel = d->kernel;
     gint       ker_width = gtk_spin_button_get_value_as_int(d->size_btn);
     gint       ker_height = gtk_spin_button_get_value_as_int(d->size_btn);
+    double    *kernel = parse_kernelstr_for_kernel(kernelstr, ker_width, ker_height);
     double     factor = gtk_spin_button_get_value(d->factor_btn);
     double     bias = gtk_spin_button_get_value(d->bias_btn);
 
@@ -214,6 +245,70 @@ void on_apply_btn_click(GtkWidget *caller
                                         factor, bias);
     
     show_resulting_image_in_new_window(res_image);
+}
+
+const char *generate_default_kernel_str(gint id)
+{
+    switch (id)
+    {
+    case FILTER_ID_NONE:
+        return DEFAULT_KERNEL_STR;
+        break;
+    case FILTER_ID_GAUSBLUR:
+        return GAUS_BLUR_KERNEL_STR;
+        break;
+    case FILTER_ID_SHARPENING:
+        return SHARPENING_KERNEL_STR;
+        break;
+    case FILTER_ID_EDGES:
+        return EDGES_KERNEL_STR;
+    
+    default:
+        return DEFAULT_KERNEL_STR;
+        break;
+    }
+}
+
+void split_string(char *str, double *res, gint width, gint height)
+{
+    const char delim[] = " {},[]";
+
+    gint i = 0;
+    gint exact_kernel_size = width*height;
+
+    char *token = strtok(str, delim);
+    while(token != NULL)
+    {
+        res[i++] = strtod(token, NULL);
+        token = strtok(NULL, delim);
+
+        if (i > exact_kernel_size)
+        {
+            g_print("Your filter kernel is bigger in size than the value in\n"
+                    "the filter size box (%d). The result is going to be incorrect.\n",
+                    width);
+            break;
+        }
+    }
+
+    if (i < exact_kernel_size)
+    {
+        g_print("Your filter kernel is smaller in size than the value in\n"
+                "the filter size box (%d). The result is going to be incorrect.\n",
+                width);
+        return;
+    }
+}
+
+double *parse_kernelstr_for_kernel(const char *str, gint width, gint height)
+{
+    double *res = (double *)calloc(width*height, sizeof(double));
+
+    char copy[strlen(str)];
+    strcpy(copy, str); // need a copy cause split_string will modify string
+    split_string(copy, res, width, height);
+
+    return &res[0];
 }
 
 void show_resulting_image_in_new_window(GdkPixbuf *pixbuf)
