@@ -74,7 +74,7 @@ GtkWidget *setup_predefined_filters_page(GdkPixbuf *pixbuf)
 /**
  * Configures page where you can specify your custom filter.
  **/
-GtkWidget *setup_custom_filters_page(GdkPixbuf *pixbuf __attribute__((unused)))
+GtkWidget *setup_custom_filters_page(GdkPixbuf *pixbuf)
 {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
