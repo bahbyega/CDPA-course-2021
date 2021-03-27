@@ -63,7 +63,7 @@ void on_init_btn_click(GtkWidget *widget)
 
     if (res == GTK_RESPONSE_OK)
     {
-        gchar *filename;
+        const gchar *filename;
         GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
         filename = gtk_file_chooser_get_filename(chooser);
 
@@ -81,7 +81,7 @@ void on_init_btn_click(GtkWidget *widget)
             gdk_pixbuf_new_from_file_at_scale(filename, -1, -1, TRUE, NULL);
 
         gulong i_size = get_file_size(filename);
-        setup_window_layout_elements(window, pixbuf, i_size);
+        setup_window_layout_elements(window, pixbuf, filename, i_size);
 
         gtk_widget_show_all(window);
     }
@@ -93,7 +93,7 @@ void on_init_btn_click(GtkWidget *widget)
  * Packs main window elements after we chose an image(pixbuf) to display
  **/
 void setup_window_layout_elements(GtkWidget *window, GdkPixbuf *pixbuf,
-                                  gulong i_size)
+                                  const gchar *filename, gulong i_size)
 {
     GtkWidget *image = gtk_image_new_from_pixbuf(pixbuf);
     GtkWidget *image_box =
@@ -121,10 +121,10 @@ void setup_window_layout_elements(GtkWidget *window, GdkPixbuf *pixbuf,
     setup_listbox_on_main_window(info_lbox, image, i_size);
     setup_menu_bar_on_main_window(menu_bar);
     setup_image_on_main_window(image_box, image, pixbuf);
-    setup_filters_on_main_window(filters_container, pixbuf);
+    setup_filters_on_main_window(filters_container, pixbuf, filename);
 }
 
-gulong get_file_size(gchar *filename)
+gulong get_file_size(const gchar *filename)
 {
     FILE *file;
 
