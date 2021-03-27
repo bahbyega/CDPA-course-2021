@@ -259,6 +259,20 @@ void on_apply_btn_click(GtkWidget *caller
     show_resulting_image_in_new_window(res_image);
 }
 
+void on_save_menu_item_click(GtkWidget *caller
+                        __attribute__((unused)), 
+                        gpointer data __attribute__((unused)))
+{
+
+}
+
+void on_save_as_menu_item_click(GtkWidget *caller
+                        __attribute__((unused)), 
+                        gpointer data __attribute__((unused)))
+{
+
+}
+
 /**
  * It gets called for generating default value in entry box.
  * Returns one of the predefined string literals.
@@ -345,20 +359,38 @@ double *parse_kernelstr_for_kernel(const char *str, gint width, gint height)
  **/
 void show_resulting_image_in_new_window(GdkPixbuf *pixbuf)
 {
-    GtkWidget *res_window;
-    GtkWidget *image;
-    GtkWidget *image_box;
-
-    res_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    GtkWidget * res_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(res_window), "Filtering result");
     gtk_window_set_default_size(GTK_WINDOW(res_window), 700, 400);
     gtk_window_set_type_hint(GTK_WINDOW(res_window), GDK_WINDOW_TYPE_HINT_DIALOG);
 
-    image = gtk_image_new();
-    image_box = gtk_layout_new(0, 0);
+    GtkWidget *image     = gtk_image_new();
+    GtkWidget *image_box = gtk_layout_new(0, 0);
+    GtkWidget *grid      = gtk_grid_new();
+
+    GtkWidget *menu_bar          = gtk_menu_bar_new();
+    GtkWidget *save_item         = gtk_menu_item_new_with_label("Save");
+    GtkWidget *save_menu         = gtk_menu_new();
+    GtkWidget *save_menu_item    = gtk_menu_item_new_with_label("Save");
+    GtkWidget *save_as_menu_item = gtk_menu_item_new_with_label("Save as...");
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), save_item);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(save_item), save_menu);
+    gtk_menu_shell_append(GTK_MENU_SHELL(save_menu), save_menu_item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(save_menu), save_as_menu_item);
+
+    g_signal_connect(G_OBJECT(save_menu_item), "activate",
+                     G_CALLBACK(on_save_menu_item_click), pixbuf);
+    g_signal_connect(G_OBJECT(save_menu_item), "activate",
+                     G_CALLBACK(on_save_as_menu_item_click), pixbuf);
 
     gtk_layout_put(GTK_LAYOUT(image_box), image, 0, 0);
-    gtk_container_add(GTK_CONTAINER(res_window), image_box);
+    gtk_grid_attach(GTK_GRID(grid), menu_bar, 1, 1, 1, 1);
+
+    gtk_grid_attach_next_to(GTK_GRID(grid), image_box, menu_bar,
+                            GTK_POS_BOTTOM, 1, 1);
+
+    gtk_container_add(GTK_CONTAINER(res_window), grid);
     setup_image_on_main_window(image_box, image, pixbuf);
 
     gtk_widget_show_all(res_window);
