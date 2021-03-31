@@ -1,6 +1,6 @@
 CC		= gcc
 CFLAGS	= -Wall -Wextra -std=c99 -fopenmp -lOpenCL `pkg-config --cflags gtk+-3.0`
-LDFLAGS	= -O3 -Os
+LDFLAGS	= -O3 -Os -L/usr/lib/x86_64-linux-gnu
 LIBS	= -lm `pkg-config --libs gtk+-3.0`
 
 BUILD_DIR = build
