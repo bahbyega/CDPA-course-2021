@@ -230,11 +230,11 @@ void on_edges_btn_click(GtkWidget *caller
     GdkPixbuf *src_pixbuf = ((ImageFileData *)data)->pixbuf;
     const gchar *filename = ((ImageFileData *)data)->filename;
 
-    double *kernel = &edges_kernel_5x5[0][0];
+    float *kernel = &edges_kernel_5x5[0][0];
     gint    ker_width = 5, ker_height = 5;
     double  factor = 1.00, bias = 0.0;
 
-    GdkPixbuf *res_pixbuf = apply_filter_parallel(src_pixbuf,
+    GdkPixbuf *res_pixbuf = apply_filter_GPGPU(src_pixbuf,
                                         kernel,
                                         ker_width, ker_height,
                                         factor, bias);
