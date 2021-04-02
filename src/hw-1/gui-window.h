@@ -14,8 +14,9 @@ void initialize_window(GtkWidget *);
 void setup_init_button(GtkWidget *);
 void on_init_btn_click(GtkWidget *);
 
-void setup_window_layout_elements(GtkWidget *, GdkPixbuf *, gulong);
+void setup_window_layout_elements(GtkWidget *, GdkPixbuf *,
+                                  const gchar *, gulong);
 
-gulong get_file_size(gchar *);
+gulong get_file_size(const gchar *);
 
 #endif /* __GUI_WINDOW_H__ */
