@@ -3,7 +3,7 @@
 void setup_listbox_on_main_window(GtkWidget *listbox, GtkWidget *image,
                                   gsize size)
 {
-    gtk_widget_set_halign(listbox, GTK_ALIGN_START);
+    gtk_widget_set_halign(listbox, GTK_ALIGN_FILL);
     gtk_widget_set_valign(listbox, GTK_ALIGN_FILL);
 
     gchar *dims = get_image_dimensions(image);

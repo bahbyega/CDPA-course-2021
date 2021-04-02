@@ -1,5 +1,5 @@
 CC		= gcc
-CFLAGS	= -Wall -Wextra -std=c99 `pkg-config --cflags gtk+-3.0`
+CFLAGS	= -Wall -Wextra -std=c99 -fopenmp `pkg-config --cflags gtk+-3.0`
 LDFLAGS	= -O3 -Os
 LIBS	= -lm `pkg-config --libs gtk+-3.0`
 

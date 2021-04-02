@@ -12,11 +12,13 @@ This repository is for the homework assignments for the Computer Data Processing
 First, make sure the following is installed on your machine:
 - `gcc` compiler :)
 - `gtk3` library for GUI
+- `OpenMP` library for parallelism
 
 To install gtk3 on debian based distros run 
 ```
 sudo apt install libgtk-3-dev
 ```
+Most likely OpenMP is already installed by default and will compile with gcc. Although, if it's not the case install it with: `sudo apt install libomp-dev`
 
 ### Build
 To build the application simply do
@@ -38,4 +40,7 @@ $ ./src/hw-1/build/out
 
 > Реализовать приложение с графическим интерфейсом пользователя, позволяющее открыть папку с изображениями, выбрать изображение, просмотреть его, просмотреть информацию о нём (размер в пикселях, размер в мегабайтах).
 
+### Task 1.2
+
+> Расширить приложение графической компонентой задания матричного фильтра. Необходимо предусмотреть возможность выбора типа фильтра, дефолтных значений, размера фильтра, корректировку весов.
 ---

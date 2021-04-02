@@ -60,7 +60,11 @@ void resize_image_keeping_aspect_ratio(GtkWidget *image_box,
 
     if (width < alloc_width)
     {
-        x_coord = (alloc_width - width) / 2;
+        gint wshift, hshift; // this shifts image pos depending on image_box pos
+        gtk_widget_translate_coordinates(image_box, 
+                 gtk_widget_get_toplevel(image_box), 0, 0, &wshift, &hshift);
+        
+        x_coord = (alloc_width - width - wshift) / 2;
         gtk_layout_move(GTK_LAYOUT(image_box), image, x_coord, y_coord);
     }
 
