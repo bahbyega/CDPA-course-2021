@@ -158,9 +158,10 @@ void host_program(guint8 *src_pixbuf,
 
     // execution
     size_t global_work_size = img_height * img_width;
+    size_t local_work_size = 256;
 
     err = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
-                                 &global_work_size, NULL, 0, NULL, NULL);
+                                 &global_work_size, &local_work_size, 0, NULL, NULL);
     if (err != CL_SUCCESS)
     {
         g_print("Couldn't enqueue kernel command. Error code=%d\n", err);
@@ -177,6 +178,8 @@ void host_program(guint8 *src_pixbuf,
         printf("Error enqueuing read buffer command. Error Code=%d\n", err);
         exit(1);
     }
+
+    clFinish(command_queue);
 
     // cleaning up
     clReleaseMemObject(src_image_buffer);
