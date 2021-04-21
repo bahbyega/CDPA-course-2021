@@ -44,3 +44,18 @@ class Graph:
             level += 1
 
         return res_vect
+
+    def perform_triangle_count(self):
+
+        def triangle_count_lower(lower_matrix_part):
+            mult_res = Matrix.sparse(INT64, self.num_verts, self.num_verts)
+
+            with semiring.PLUS_TIMES_INT64:
+                mult_res = lower_matrix_part.mxm(
+                    lower_matrix_part, mask=lower_matrix_part, desc=descriptor.T1)
+
+            return mult_res.reduce_int()
+
+        lower_matr = self.matrix.tril()
+
+        return triangle_count_lower(lower_matr)

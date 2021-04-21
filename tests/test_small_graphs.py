@@ -34,3 +34,14 @@ def test_Graph_perform_level_BFS_on_disconnected_graph():
 
     print(all([act_item == exp_item for act_item,
           exp_item in zip(actual, expected)]))
+
+
+def test_Graph_perfrom_triangle_count_on_undir_graph():
+    test_data_path = os.path.join(os.getcwd(), 'tests/test_data/')
+    graph = Graph.load_from_file(os.path.join(
+        test_data_path, 'small_undir_graph.txt'))
+
+    actual = graph.perform_triangle_count()
+    expected = 5
+
+    assert actual == expected
