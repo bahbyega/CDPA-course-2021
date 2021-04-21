@@ -45,17 +45,23 @@ class Graph:
 
         return res_vect
 
-    def perform_triangle_count(self):
+    def perform_triangles_count_on_undir_graph(self):
 
-        def triangle_count_lower(lower_matrix_part):
-            mult_res = Matrix.sparse(INT64, self.num_verts, self.num_verts)
+        def triangular_adj_matr_count(adj_matrix_part):
+            res_matr = Matrix.sparse(INT64, self.num_verts, self.num_verts)
 
             with semiring.PLUS_TIMES_INT64:
-                mult_res = lower_matrix_part.mxm(
-                    lower_matrix_part, mask=lower_matrix_part, desc=descriptor.T1)
+                res_matr = adj_matrix_part.mxm(
+                    adj_matrix_part, mask=adj_matrix_part, desc=descriptor.T1)
 
-            return mult_res.reduce_int()
+            return res_matr.reduce_int()
 
         lower_matr = self.matrix.tril()
+        upper_matr = self.matrix.triu()
 
-        return triangle_count_lower(lower_matr)
+        # if graph undirected
+        if (lower_matr.iseq(upper_matr.transpose())):
+            count = triangular_adj_matr_count(lower_matr)
+            return count
+
+        raise Exception("Graph is not undirected")

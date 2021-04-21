@@ -6,6 +6,7 @@ from pygraphblas import Vector
 from src.hw_2.Graph import Graph
 
 
+# BFS tests
 def test_Graph_perform_level_BFS_on_basic_graph():
     test_data_path = os.path.join(os.getcwd(), 'tests/test_data/')
     graph = Graph.load_from_file(os.path.join(
@@ -36,12 +37,13 @@ def test_Graph_perform_level_BFS_on_disconnected_graph():
           exp_item in zip(actual, expected)]))
 
 
-def test_Graph_perfrom_triangle_count_on_undir_graph():
+# Triangle count tests
+def test_Graph_perfrom_triangles_count_on_undir_graph():
     test_data_path = os.path.join(os.getcwd(), 'tests/test_data/')
     graph = Graph.load_from_file(os.path.join(
         test_data_path, 'small_undir_graph.txt'))
 
-    actual = graph.perform_triangle_count()
+    actual = graph.perform_triangles_count_on_undir_graph()
     expected = 5
 
     assert actual == expected
