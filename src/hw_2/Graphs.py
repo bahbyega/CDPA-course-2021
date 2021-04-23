@@ -17,7 +17,7 @@ class UnweightedGraph:
 
             for line in f:
                 from_vert, to_vert = [
-                    int(vert) for vert in line.replace('\n', '').split(' ', 1)]
+                    int(vert) for vert in line.split(' ', 1)]
                 graph.matrix[from_vert, to_vert] = True
 
         return graph
@@ -34,7 +34,7 @@ class WeightedGraph:
             graph = WeightedGraph(verts_count)
 
             for line in f:
-                edge = line.replace('\n', '').split(' ', 2)
+                edge = line.split(' ', 2)
                 from_vert, to_vert = int(edge[0]), int(edge[1])
                 value = float(edge[2])
 
