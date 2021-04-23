@@ -16,7 +16,7 @@ def perform_level_bfs(graph, src_vertex):
     Computes traversal level for each vertex from source vertex.
 
     graph: any graph
-    src_vertext: source vertex
+    src_vertex: source vertex
 
     return: Vector of visited vertices
     """
@@ -75,7 +75,7 @@ def perform_bellman_ford(graph, src_vertex):
     (reachable) vertex in the graph.
 
     graph: weighted graph
-    src_vertext: source vertex
+    src_vertex: source vertex
 
     return: Vector of computed distances
     """
