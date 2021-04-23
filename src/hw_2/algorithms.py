@@ -1,6 +1,9 @@
+from math import inf
+
 from pygraphblas import (
     BOOL,
     INT64,
+    FP64,
     Matrix,
     Vector,
     semiring,
@@ -49,3 +52,19 @@ def perform_triangles_count_on_undir_graph(graph):
         return count
 
     raise Exception("Graph is not undirected")
+
+
+def perform_bellman_ford(graph, src_vertex):
+    res_vect = Vector.dense(FP64, graph.num_verts, fill=inf)
+    res_vect[src_vertex] = 0.0
+
+    with semiring.MIN_PLUS_FP64:
+        for _ in range(graph.num_verts):
+            found_vect = res_vect.dup()
+            res_vect = res_vect.vxm(
+                graph.matrix, accum=FP64.MIN)
+
+            if found_vect.iseq(res_vect):
+                break
+
+    return res_vect

@@ -1,6 +1,6 @@
 from pygraphblas import (
     BOOL,
-    FP32,
+    FP64,
     Matrix
 )
 
@@ -25,7 +25,7 @@ class UnweightedGraph:
 
 class WeightedGraph:
     def __init__(self, num_verts):
-        self.matrix = Matrix.sparse(FP32, num_verts, num_verts)
+        self.matrix = Matrix.sparse(FP64, num_verts, num_verts)
         self.num_verts = num_verts
 
     def load_from_file(path):
@@ -35,7 +35,7 @@ class WeightedGraph:
 
             for line in f:
                 edge = line.replace('\n', '').split(' ', 2)
-                from_vert, to_vert = int(edge[0], edge[1])
+                from_vert, to_vert = int(edge[0]), int(edge[1])
                 value = float(edge[2])
 
                 graph.matrix[from_vert, to_vert] = value

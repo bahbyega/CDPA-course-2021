@@ -3,7 +3,7 @@ import pytest
 
 from pygraphblas import Vector
 
-from src.hw_2.Graphs import UnweightedGraph
+from src.hw_2.Graphs import UnweightedGraph, WeightedGraph
 from src.hw_2.algorithms import *
 
 
@@ -21,9 +21,6 @@ def test_Graph_perform_level_BFS_on_basic_graph():
     assert len(actual) == len(expected)
     assert actual.iseq(expected)
 
-    print(all([act_item == exp_item for act_item,
-          exp_item in zip(actual, expected)]))
-
 
 def test_Graph_perform_level_BFS_on_disconnected_graph():
     graph = UnweightedGraph.load_from_file(os.path.join(
@@ -35,12 +32,9 @@ def test_Graph_perform_level_BFS_on_disconnected_graph():
     assert len(actual) == len(expected)
     assert actual.iseq(expected)
 
-    print(all([act_item == exp_item for act_item,
-          exp_item in zip(actual, expected)]))
-
 
 # Triangle count tests
-def test_Graph_perfrom_triangles_count_on_undir_graph():
+def test_Graph_perform_triangles_count_on_undir_graph():
     graph = UnweightedGraph.load_from_file(os.path.join(
         test_data_path, 'small_undir_graph.txt'))
 
@@ -48,3 +42,15 @@ def test_Graph_perfrom_triangles_count_on_undir_graph():
     expected = 5
 
     assert actual == expected
+
+
+# Bellman-ford tests
+def test_Graph_perform_bellman_ford():
+    graph = WeightedGraph.load_from_file(os.path.join(
+        test_data_path, 'small_weighted_graph.txt'))
+
+    actual = perform_bellman_ford(graph, 0)
+    expected = Vector.from_list([0.0, 0.3, 1.0, 0.8, 0.4, 0.5, 1.0])
+
+    assert len(actual) == len(expected)
+    assert actual.iseq(expected)
