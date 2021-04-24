@@ -1,5 +1,3 @@
-from math import inf
-
 from pygraphblas import (
     BOOL,
     INT64,
@@ -20,7 +18,8 @@ def perform_level_bfs(graph, src_vertex):
 
     return: Vector of visited vertices
     """
-    res_vect = Vector.dense(INT64, graph.num_verts, fill=0)
+    res_vect = Vector.dense(
+        INT64, graph.num_verts, fill=0)  # filling allows to work with disconnected graphs
     found_nodes_vect = Vector.sparse(BOOL, graph.num_verts)
     found_nodes_vect[src_vertex] = True
 
@@ -79,8 +78,12 @@ def perform_bellman_ford(graph, src_vertex):
 
     return: Vector of computed distances
     """
-    res_vect = Vector.dense(FP64, graph.num_verts, fill=inf)
-    res_vect[src_vertex] = 0.0
+    if not graph.matrix.type == FP64:
+        raise Exception("Graph is not weighted")
+        return
+
+    res_vect = Vector.sparse(FP64, graph.num_verts)
+    res_vect[src_vertex] = 0
 
     with semiring.MIN_PLUS_FP64:
         for _ in range(graph.num_verts):
