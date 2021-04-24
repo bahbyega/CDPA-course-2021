@@ -1,7 +1,7 @@
-import os
+from os import path, getcwd
 from argparse import ArgumentParser
 
-from src.hw_2.Graphs import *
+from src.hw_2.Graphs import UnweightedGraph, WeightedGraph
 from src.hw_2.grb_algorithms import *
 
 
@@ -28,7 +28,7 @@ def main():
     else:
         graph = UnweightedGraph.load_from_file(args.graph_filepath)
 
-    graph_full_filepath = os.path.join(os.getcwd(), args.graph_filepath)
+    graph_full_filepath = path.join(getcwd(), args.graph_filepath)
     print(f'\nGraph from {graph_full_filepath} :\n{graph.matrix}\n')
 
     if args.perform is not None:
