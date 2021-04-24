@@ -66,9 +66,35 @@ Activate testing environment:
 $ conda create -q -n test-env python=3.8 pyghraphblas pytest
 $ conda activate test-env
 ```
-Run tests:
+Run program:
 ```
-$ python -m pytest tests/test_small_graphs.py
+usage: main.py [-h] [-w] [-p {level_bfs,triangles_count,bellman_ford}] graph_filepath
+
+Perform algorithms on graphs
+
+positional arguments:
+  graph_filepath        Path to your graph.txt file, where first line contains
+                        the number of vertices, other lines contain
+                        information about edges in the format of "src_vertex
+                        to_vertex [value]"
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -w, --weighted        Specify this flag if graph is weighted
+  -p {level_bfs,triangles_count,bellman_ford}, --perform {level_bfs,triangles_count,bellman_ford}
+                        Algorithm to perform: level_bfs, triangles_count,
+                        bellman_ford
+```
+Example:
+```
+Run Bellman-Ford algorithm on weighted graph from test_data: 
+$ python main.py -w -p bellman_ford tests/test_data/weighted_graph.txt
+```
+
+### Testing
+To manually run tests activate testing environment and run:
+```
+$ python -m pytest
 ```
 
 ### Task 2.1
