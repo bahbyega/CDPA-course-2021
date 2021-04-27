@@ -19,14 +19,14 @@ def perform_level_bfs(graph, src_vertex):
     return: Vector of visited vertices
     """
     res_vect = Vector.dense(
-        INT64, graph.num_verts, fill=0)  # filling allows to work with disconnected graphs
-    found_nodes_vect = Vector.sparse(BOOL, graph.num_verts)
+        INT64, graph.matrix.nrows, fill=0)  # filling allows to work with disconnected graphs
+    found_nodes_vect = Vector.sparse(BOOL, graph.matrix.nrows)
     found_nodes_vect[src_vertex] = True
 
     not_empty = True
     level = 1
 
-    while not_empty and level <= graph.num_verts:
+    while not_empty and level <= graph.matrix.nrows:
         res_vect.assign_scalar(level, mask=found_nodes_vect)
 
         with semiring.LOR_LAND_BOOL:
@@ -49,7 +49,7 @@ def perform_triangles_count(graph):
     """
     # takes lower or upper triangular portion of adj matrix
     def triangular_adj_matr_count(adj_matrix_part):
-        res_matr = Matrix.sparse(INT64, graph.num_verts, graph.num_verts)
+        res_matr = Matrix.sparse(INT64, graph.matrix.nrows, graph.matrix.nrows)
 
         with semiring.PLUS_TIMES_INT64:
             res_matr = adj_matrix_part.mxm(
@@ -82,11 +82,11 @@ def perform_bellman_ford(graph, src_vertex):
         raise Exception("Graph is not weighted")
         return
 
-    res_vect = Vector.sparse(FP64, graph.num_verts)
+    res_vect = Vector.sparse(FP64, graph.matrix.nrows)
     res_vect[src_vertex] = 0
 
     with semiring.MIN_PLUS_FP64:
-        for _ in range(graph.num_verts):
+        for _ in range(graph.matrix.nrows):
             found_vect = res_vect.dup()
             res_vect = res_vect.vxm(
                 graph.matrix, accum=FP64.MIN)

@@ -24,9 +24,9 @@ def main():
     args = parser.parse_args()
 
     if args.weighted:
-        graph = WeightedGraph.load_from_file(args.graph_filepath)
+        graph = WeightedGraph.from_mm_file(args.graph_filepath)
     else:
-        graph = UnweightedGraph.load_from_file(args.graph_filepath)
+        graph = UnweightedGraph.from_mm_file(args.graph_filepath)
 
     graph_full_filepath = path.join(getcwd(), args.graph_filepath)
     print(f'\nGraph from {graph_full_filepath} :\n{graph.matrix}\n')

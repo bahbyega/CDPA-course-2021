@@ -73,10 +73,7 @@ usage: main.py [-h] [-w] [-p {level_bfs,triangles_count,bellman_ford}] graph_fil
 Perform algorithms on graphs
 
 positional arguments:
-  graph_filepath        Path to your graph.txt file, where first line contains
-                        the number of vertices, other lines contain
-                        information about edges in the format of "src_vertex
-                        to_vertex [value]"
+  graph_filepath        Path to your graph.mtx file in MatrixMarket format
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -88,7 +85,7 @@ optional arguments:
 Example:
 ```
 Run Bellman-Ford algorithm on weighted graph from test_data: 
-$ python main.py -w -p bellman_ford tests/test_data/weighted_graph.txt
+$ python main.py -w -p bellman_ford tests/test_data/weighted_graph.mtx
 ```
 
 ### Testing
