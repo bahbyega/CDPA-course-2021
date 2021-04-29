@@ -56,3 +56,9 @@ build/
 
 # Editor
 .vscode/
+
+
+### Python ###
+# Byte-compiled
+__pycache__/
+.pytest_cache

@@ -47,4 +47,55 @@ $ ./src/hw-1/build/out
 ### Task 1.3
 
 > Расширить приложение возможностью отображать одновременно два изображения: до и после применения фильтра. Предусмотреть возможность сохранять результат применения фильтра.
+
+---
+
+## Homework II
+[![Build Status](https://www.travis-ci.com/bahbyega/CDPA-course-2021.svg?branch=Task-2.1)](https://www.travis-ci.com/bahbyega/CDPA-course-2021)
+
+### Requirements
+- `Conda` package manager is required for installing python packages. You can install it via [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
+
+### Executing
+Add package channel for `pygraphblas`:
+```
+$ conda config --append channels conda-forge
+```
+Activate testing environment:
+```
+$ conda create -q -n test-env python=3.8 pyghraphblas pytest
+$ conda activate test-env
+```
+Run program:
+```
+usage: main.py [-h] [-w] [-p {level_bfs,triangles_count,bellman_ford}] graph_filepath
+
+Perform algorithms on graphs
+
+positional arguments:
+  graph_filepath        Path to your graph.mtx file in MatrixMarket format
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -w, --weighted        Specify this flag if graph is weighted
+  -p {level_bfs,triangles_count,bellman_ford}, --perform {level_bfs,triangles_count,bellman_ford}
+                        Algorithm to perform: level_bfs, triangles_count,
+                        bellman_ford
+```
+Example:
+```
+Run Bellman-Ford algorithm on weighted graph from test_data: 
+$ python main.py -w -p bellman_ford tests/test_data/weighted_graph.mtx
+```
+
+### Testing
+To manually run tests activate testing environment and run:
+```
+$ python -m pytest
+```
+
+### Task 2.1
+
+> Необходимо выбрать и реализовать минимум 3 различных алгоритма (требующих различных операций) анализа графов с использованием операций линейной алгебры на (py)graphblas.
+
 ---
