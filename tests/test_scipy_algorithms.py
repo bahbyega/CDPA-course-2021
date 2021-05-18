@@ -8,7 +8,7 @@ TEST_DATA_PATH = os.path.join(os.getcwd(), 'tests/test_data/')
 
 
 # BFS tests
-def test_Graph_perform_level_bfs_on_basic_graph():
+def test_sp_bfs_on_basic_graph():
     graph = sp_graph_from_mm_file(os.path.join(
         TEST_DATA_PATH, 'basic_graph.mtx'))
 
@@ -18,7 +18,7 @@ def test_Graph_perform_level_bfs_on_basic_graph():
     assert (actual == expected).all()
 
 
-def test_Graph_perform_level_bfs_on_disconnected_graph():
+def test_sp_bfs_on_disconnected_graph():
     graph = sp_graph_from_mm_file(os.path.join(
         TEST_DATA_PATH, 'disconnected_graph.mtx'))
 
@@ -28,7 +28,7 @@ def test_Graph_perform_level_bfs_on_disconnected_graph():
     assert (actual == expected).all()
 
 
-def test_Graph_perform_level_bfs_on_weighted_graph():
+def test_sp_bfs_on_weighted_graph():
     graph = sp_graph_from_mm_file(os.path.join(
         TEST_DATA_PATH, 'weighted_graph.mtx'))
 
