@@ -19,10 +19,10 @@ def main():
                         help='Specify this flag if graph is weighted')
 
     parser.add_argument('--blas', action='store_true',
-                        help='Specify this flag if yoo want to run algorithms with pygraphblas')
+                        help='Specify this flag if you want to run algorithms with pygraphblas')
 
     parser.add_argument('--scipy', action='store_true',
-                        help='Specify this flag if yoo want to run algorithms with scipy')
+                        help='Specify this flag if you want to run algorithms with scipy')
 
     algorithms_choices = ['level_bfs', 'triangles_count', 'bellman_ford']
     parser.add_argument('-p', '--perform', choices=algorithms_choices,

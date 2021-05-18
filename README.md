@@ -63,12 +63,15 @@ $ conda config --append channels conda-forge
 ```
 Activate testing environment:
 ```
-$ conda create -q -n test-env python=3.8 pyghraphblas pytest
+$ conda create -q -n test-env python=3.8 pyghraphblas pytest scipy
 $ conda activate test-env
 ```
 Run program:
 ```
-usage: main.py [-h] [-w] [-p {level_bfs,triangles_count,bellman_ford}] graph_filepath
+usage: main.py [-h] [-w] [--blas] [--scipy]
+               [-p {level_bfs,triangles_count,bellman_ford}]
+               graph_filepath
+
 
 Perform algorithms on graphs
 
@@ -78,14 +81,18 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -w, --weighted        Specify this flag if graph is weighted
+  --blas                Specify this flag if you want to run algorithms with
+                        pygraphblas
+  --scipy               Specify this flag if you want to run algorithms with
+                        scipy
   -p {level_bfs,triangles_count,bellman_ford}, --perform {level_bfs,triangles_count,bellman_ford}
                         Algorithm to perform: level_bfs, triangles_count,
                         bellman_ford
 ```
 Example:
 ```
-Run Bellman-Ford algorithm on weighted graph from test_data: 
-$ python main.py -w -p bellman_ford tests/test_data/weighted_graph.mtx
+Run Bellman-Ford algorithm implemented with pygraphblas on weighted graph from test_data: 
+$ python main.py --blas -w -p bellman_ford tests/test_data/weighted_graph.mtx
 ```
 
 ### Testing
@@ -98,4 +105,7 @@ $ python -m pytest
 
 > Необходимо выбрать и реализовать минимум 3 различных алгоритма (требующих различных операций) анализа графов с использованием операций линейной алгебры на (py)graphblas.
 
+### Task 2.2
+
+> Реализовать выбранные алгоритмы на sciPy.
 ---
