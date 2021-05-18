@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 
 from src.hw_2.Graphs import UnweightedGraph, WeightedGraph
 from src.hw_2.grb_algorithms import *
+from src.hw_2.scipy_algorithms import *
 
 
 def main():
@@ -16,6 +17,12 @@ def main():
 
     parser.add_argument('-w', '--weighted', action='store_true',
                         help='Specify this flag if graph is weighted')
+
+    parser.add_argument('--blas', action='store_true',
+                        help='Specify this flag if yoo want to run algorithms with pygraphblas')
+
+    parser.add_argument('--scipy', action='store_true',
+                        help='Specify this flag if yoo want to run algorithms with scipy')
 
     algorithms_choices = ['level_bfs', 'triangles_count', 'bellman_ford']
     parser.add_argument('-p', '--perform', choices=algorithms_choices,
@@ -34,15 +41,28 @@ def main():
     if args.perform is not None:
         if 'level_bfs' in args.perform:
             src_vertex = int(input('Specify source vertex for Level BFS: '))
-            print(f'\nLevel BFS:\n{perform_level_bfs(graph, src_vertex)}')
+            if args.scipy:
+                graph = sp_graph_from_mm_file(graph_full_filepath)
+                print(f'\nLevel BFS:\n{sp_bfs(graph, src_vertex)}')
+            else:
+                print(f'\nLevel BFS:\n{perform_level_bfs(graph, src_vertex)}')
 
         if 'triangles_count' in args.perform:
-            print(f'Triangles count: {perform_triangles_count(graph)}')
+            if args.scipy:
+                graph = sp_graph_from_mm_file(graph_full_filepath)
+                print(f'Triangles count: {sp_triangle_count(graph)}')
+            else:
+                print(f'Triangles count: {perform_triangles_count(graph)}')
 
         if 'bellman_ford' in args.perform:
             src_vertex = int(input('Specify source vertex for Bellman-Ford: '))
-            print(
-                f'\nSSSP (Bellman-Ford):\n{perform_bellman_ford(graph, src_vertex)}')
+            if args.scipy:
+                graph = sp_graph_from_mm_file(graph_full_filepath)
+                print(
+                    f'\nSSSP (Bellman-Ford):\n{sp_bellman_ford(graph, src_vertex)}')
+            else:
+                print(
+                    f'\nSSSP (Bellman-Ford):\n{perform_bellman_ford(graph, src_vertex)}')
 
 
 if __name__ == "__main__":
