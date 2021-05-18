@@ -1,15 +1,13 @@
-import numpy as np
-import scipy.sparse.linalg as la
+import numpy as np  # for vector operations
 
 from scipy.io import mmread
 
-from scipy.sparse import csgraph
-from scipy.sparse import csr_matrix
 from scipy.sparse import tril, triu
+from scipy.sparse import csgraph
 
 
-def scipy_graph_from_mm_file(path):
-    return mmread(path)
+def sp_graph_from_mm_file(path):
+    return mmread(path).tocsr()
 
 
 def sp_bfs(graph, src_vertex):
@@ -45,6 +43,13 @@ def sp_bfs(graph, src_vertex):
 
 
 def sp_triangle_count(graph):
+    """
+    Computes the number of triangles in the graph.
+
+    graph: undirected graph
+
+    return: (int) number of triangles
+    """
     def triangular_adj_matr_count(adj_matrix_part):
         res_matr = adj_matrix_part.multiply(adj_matrix_part*adj_matrix_part)
         return int(res_matr.sum())
@@ -61,7 +66,15 @@ def sp_triangle_count(graph):
 
 
 def sp_bellman_ford(graph, src_vertex):
-    # nocheckin: is it ok to just call library func?
-    res = csgraph.bellman_ford(
-        graph, indices=src_vertex, return_predecessors=False)
-    return res
+    """
+    From a given start vertex, finds the shortest paths to every other
+    (reachable) vertex in the graph.
+
+    graph: weighted graph
+    src_vertex: source vertex
+
+    return: Vector of computed distances
+    """
+    return csgraph.bellman_ford(graph,
+                                indices=src_vertex,
+                                return_predecessors=False)
