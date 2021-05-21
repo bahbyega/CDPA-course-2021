@@ -91,6 +91,11 @@ optional arguments:
                         Algorithm to perform: level_bfs, triangles_count,
                         bellman_ford
 ```
+Example:
+```
+Run Bellman-Ford algorithm implemented with pygraphblas on weighted graph from test_data: 
+$ python main.py --blas -w -p bellman_ford tests/test_data/weighted_graph.mtx
+```
 
 ### Testing
 To manually run tests activate testing environment and run:
