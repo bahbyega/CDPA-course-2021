@@ -1,5 +1,5 @@
 """
-Standard algortihms for graphs with networkx library
+Standard algorithms for graphs with networkx library
 """
 
 from scipy.io import mmread  # only for loading mtx files

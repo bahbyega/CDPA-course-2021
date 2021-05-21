@@ -11,10 +11,7 @@ def main():
     parser = ArgumentParser(description='Perform algorithms on graphs')
 
     parser.add_argument('graph_filepath',
-                        help='Path to your graph.txt file, '
-                        'where first line contains the number of vertices, '
-                        'other lines contain information about edges '
-                        'in the format of "src_vertex to_vertex [value]"')
+                        help='Path to your graph.mtx file in MatrixMarket format')
 
     parser.add_argument('-w', '--weighted', action='store_true',
                         help='Specify this flag if graph is weighted')

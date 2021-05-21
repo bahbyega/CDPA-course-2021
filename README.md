@@ -63,12 +63,12 @@ $ conda config --append channels conda-forge
 ```
 Activate testing environment:
 ```
-$ conda create -q -n test-env python=3.8 pyghraphblas pytest scipy
+$ conda create -q -n test-env python=3.8 pyghraphblas pytest scipy networkx
 $ conda activate test-env
 ```
 Run program:
 ```
-usage: main.py [-h] [-w] [--blas] [--scipy]
+usage: main.py [-h] [-w] [--blas] [--scipy] [--std]
                [-p {level_bfs,triangles_count,bellman_ford}]
                graph_filepath
 
@@ -85,14 +85,11 @@ optional arguments:
                         pygraphblas
   --scipy               Specify this flag if you want to run algorithms with
                         scipy
+  --std                 Specify this flag if you want to run algorithms with
+                        standard library
   -p {level_bfs,triangles_count,bellman_ford}, --perform {level_bfs,triangles_count,bellman_ford}
                         Algorithm to perform: level_bfs, triangles_count,
                         bellman_ford
-```
-Example:
-```
-Run Bellman-Ford algorithm implemented with pygraphblas on weighted graph from test_data: 
-$ python main.py --blas -w -p bellman_ford tests/test_data/weighted_graph.mtx
 ```
 
 ### Testing
@@ -108,4 +105,9 @@ $ python -m pytest
 ### Task 2.2
 
 > Реализовать выбранные алгоритмы на sciPy.
+
+### Task 2.3
+
+> Реализовать выбранные алгоритмы на стандартной библиотеке для анализа графов.
+
 ---
