@@ -13,6 +13,9 @@
 *.cb2
 .*.lb
 
+# Generated pdf
+*.pdf
+
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
 *.bcf
