@@ -5,7 +5,7 @@ all: report
 .PHONY: clean
 
 report:
-	@echo 'PDF generation is started.'
+	@echo 'PDF generation has started.'
 	@echo '--------------------------First step.--------------------------'
 	pdflatex $(DOCNAME).tex
 	@echo '--------------------------Bibliography generation.--------------------------'
@@ -13,10 +13,7 @@ report:
 	@echo '--------------------------Second step.--------------------------'
 	pdflatex $(DOCNAME).tex
 	pdflatex $(DOCNAME).tex
-	@echo 'Report compilation is finished successfully.'
-
-view: report
-	open $(DOCNAME).pdf
+	@echo 'Report compilation has finished successfully.'
 
 clean:
 	rm *.blg *.bbl *.aux *.log *.out
