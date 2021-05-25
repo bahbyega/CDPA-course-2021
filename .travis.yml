@@ -39,3 +39,13 @@ jobs:
       script:
         - python -m pytest
 
+    - language: generic
+      sudo: required
+
+      before_install:
+        - sudo apt-get -qq update
+        - sudo apt-get install -y texlive-base texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-lang-cyrillic
+      
+      script:
+        - cd reports/LABasedGraphAlgorithms
+        - make report
