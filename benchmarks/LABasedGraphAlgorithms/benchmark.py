@@ -80,15 +80,25 @@ def measure_std_runtime(graph, src_vertex):
 
 
 def graph_algorithms_benchmark():
-    datasets = ['ca-AstroPh', 'ca-CondMat', 'ca-HepTh']
-
-    algorithms = ['breadth_first_search', 'triangle_count', 'bellman_ford']
+    datasets = ['ca-AstroPh', 'ca-CondMat', 'ca-HepTh',
+                'amazon-0302', 'amazon-0312', 'amazon-0505', 'amazon-0601']
+    count_of_iterations = 10
 
     for dataset in datasets:
         dataset_type = dataset.split('-')[0]
-        with open(f'{OUTPUT_PATH}{dataset_type}/{dataset}.csv', 'w+') as out_csv:
-            out_csv.write(
-                f'dataset,algorithm_implementation,algorithm_name,algorithm_runtime\n')
+
+        with open(f'{OUTPUT_PATH}{dataset_type}/{dataset}_pygraphblas.csv', 'w+') as out_csv_pygraphblas,\
+                open(f'{OUTPUT_PATH}{dataset_type}/{dataset}_scipy.csv', 'w+') as out_csv_scipy,\
+                open(f'{OUTPUT_PATH}{dataset_type}/{dataset}_networkx.csv', 'w+') as out_csv_networkx:
+
+            # field names
+            out_csv_pygraphblas.write(
+                'breadth_first_search,triangles_count,bellman_ford\n')
+            out_csv_scipy.write(
+                'breadth_first_search,triangles_count,bellman_ford\n')
+            out_csv_networkx.write(
+                'breadth_first_search,triangles_count,bellman_ford\n')
+
             graph_dir = f'{DATASETS_PATH}{dataset_type}/'
             graph_path = os.path.join(graph_dir, f'{dataset}.mtx')
 
@@ -100,39 +110,36 @@ def graph_algorithms_benchmark():
             sp_graph = sp_graph_from_mm_file(graph_path)
             std_graph = std_undir_graph_from_mm_file(graph_path)
 
-            count_of_iterations = 5
-
             for i in range(1, count_of_iterations + 1):
                 print(
                     f'Choosing source vertex for {dataset} ... {i} iteration')
                 src_vertex = choice(list(std_graph.nodes()))
 
-                # run algorithms 3 times for each chosen vertex
-                for _ in range(3):
-                    print(
-                        f'Running GraphBlas algorithms for {dataset} ... {i} iteration')
-                    grb_res = measure_grb_runtime(
-                        grb_unweighted_graph, grb_weighted_graph, src_vertex)
+                print(
+                    f'Running GraphBlas algorithms for {dataset} ... {i} iteration')
+                grb_res = measure_grb_runtime(
+                    grb_unweighted_graph, grb_weighted_graph, src_vertex)
 
-                    print(
-                        f'Running SciPy algorithms for {dataset} ... {i} iteration')
-                    sp_res = measure_sp_runtime(sp_graph, src_vertex)
+                print(
+                    f'Running SciPy algorithms for {dataset} ... {i} iteration')
+                sp_res = measure_sp_runtime(sp_graph, src_vertex)
 
-                    print(
-                        f'Running Networkx algorithms for {dataset} ... {i} iteration')
-                    std_res = measure_std_runtime(std_graph, src_vertex)
+                print(
+                    f'Running Networkx algorithms for {dataset} ... {i} iteration')
+                std_res = measure_std_runtime(std_graph, src_vertex)
 
-                    print(
-                        f'Writing results in output file for {dataset} ... {i} iteration')
-                    for j in range(3):
-                        out_csv.write(
-                            f'{dataset},pygraphblas,{algorithms[j]},{grb_res[j]}\n')
-                        out_csv.write(
-                            f'{dataset},scipy,{algorithms[j]},{sp_res[j]}\n')
-                        out_csv.write(
-                            f'{dataset},networkx,{algorithms[j]},{std_res[j]}\n')
-                    print(
-                        f'---------- Iteration {i} for {dataset} finished ----------\n')
+                print(
+                    f'Writing results in output files for {dataset} ... {i} iteration')
+
+                out_csv_pygraphblas.write(
+                    f'{grb_res[0]},{grb_res[1]},{grb_res[2]}\n')
+                out_csv_scipy.write(
+                    f'{sp_res[0]},{sp_res[1]},{sp_res[2]}\n')
+                out_csv_networkx.write(
+                    f'{std_res[0]},{std_res[1]},{std_res[2]}\n')
+
+                print(
+                    f'---------- Iteration {i} for {dataset} finished ----------\n')
 
             print(
                 f'----------Benchmark for {dataset} finished----------\n')
