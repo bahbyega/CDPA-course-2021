@@ -80,7 +80,7 @@ def measure_std_runtime(graph, src_vertex):
 
 def graph_algorithms_benchmark():
     datasets = ['ca-AstroPh', 'ca-CondMat', 'ca-HepTh',
-                'amazon-0302', 'amazon-0312', 'amazon-0505', 'amazon-0601'
+                'amazon-0302', 'amazon-0302.1', 'amazon-0312', 'amazon-0505', 'amazon-0601'
                 'com-Youtube']
     count_of_iterations = 5
 

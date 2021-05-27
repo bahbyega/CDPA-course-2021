@@ -25,7 +25,7 @@ def draw_bar(file, label, axs, position, bar_height, with_triangle_count):
     plt.ioff()
 
 
-def draw_benchmarks(file_list, title, out, with_triangle_count):
+def draw_benchmarks(file_list, title, out, with_triangle_count, logscale):
     fig = plt.figure()
     axs = plt.axes()
 
@@ -42,7 +42,8 @@ def draw_benchmarks(file_list, title, out, with_triangle_count):
         position = [y + bar_height for y in position]
 
     # customizing chart
-    axs.set_xscale('log', basex=2)
+    if logscale:
+        axs.set_xscale('log', base=2)
     axs.xaxis.set_major_formatter(ScalarFormatter())
     axs.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
     axs.set_xlabel('Время исполнения(сек)')
@@ -57,42 +58,48 @@ def draw_benchmarks(file_list, title, out, with_triangle_count):
     plt.close(fig)
 
 
-draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-AstroPh_pygraphblas.csv', 'pyGrb'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-AstroPh_scipy.csv', 'sciPy'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-AstroPh_networkx.csv', 'networkX')],
-                'ca-AstroPh (|V|=18,772; |E|=198,110)', 'ca-AstroPh.pdf', True)
+if __name__ == "__main__":
+    draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-AstroPh_pygraphblas.csv', 'pyGrb'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-AstroPh_scipy.csv', 'sciPy'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-AstroPh_networkx.csv', 'networkX')],
+                    'ca-AstroPh (|V|=18,772; |E|=198,110)', 'ca-AstroPh.pdf', True, True)
 
-draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-CondMat_pygraphblas.csv', 'pyGrb'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-CondMat_scipy.csv', 'sciPy'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-CondMat_networkx.csv', 'networkX')],
-                'ca-CondMat (|V|=23,133; |E|=93,497)', 'ca-CondMat.pdf', True)
+    draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-CondMat_pygraphblas.csv', 'pyGrb'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-CondMat_scipy.csv', 'sciPy'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-CondMat_networkx.csv', 'networkX')],
+                    'ca-CondMat (|V|=23,133; |E|=93,497)', 'ca-CondMat.pdf', True, True)
 
-draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-HepTh_pygraphblas.csv', 'pyGrb'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-HepTh_scipy.csv',  'sciPy'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-HepTh_networkx.csv', 'networkX')],
-                'ca-HepTh (|V|=9,877; |E|=25,998)', 'ca-HepTh.pdf', True)
+    draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-HepTh_pygraphblas.csv', 'pyGrb'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-HepTh_scipy.csv',  'sciPy'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/ca/ca-HepTh_networkx.csv', 'networkX')],
+                    'ca-HepTh (|V|=9,877; |E|=25,998)', 'ca-HepTh.pdf', True, True)
 
-draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0302_pygraphblas.csv', 'pyGrb'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0302_scipy.csv',  'sciPy'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0302_networkx.csv', 'networkX')],
-                'amazon-0302 (|V|=262,111; |E|=1,234,877)', 'amazon-0302.pdf', False)
+    draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0302_pygraphblas.csv', 'pyGrb'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0302_scipy.csv',  'sciPy'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0302_networkx.csv', 'networkX')],
+                    'amazon-0302 (|V|=262,111; |E|=1,234,877)', 'amazon-0302.pdf', False, True)
 
-draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0312_pygraphblas.csv', 'pyGrb'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0312_scipy.csv',  'sciPy'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0312_networkx.csv', 'networkX')],
-                'amazon-0312 (|V|=400,727; |E|=3,200,440)', 'amazon-0312.pdf', False)
+    draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0302.1_pygraphblas.csv', 'pyGrb'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0302.1_scipy.csv',  'sciPy'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0302.1_networkx.csv', 'networkX')],
+                    'amazon-0302 (|V|=262,111; |E|=1,234,877)', 'amazon-0302.1.pdf', False, False)
 
-draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0505_pygraphblas.csv', 'pyGrb'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0505_scipy.csv',  'sciPy'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0505_networkx.csv', 'networkX')],
-                'amazon-0505 (|V|=410,236; |E|=3,356,824)', 'amazon-0505.pdf', False)
+    draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0312_pygraphblas.csv', 'pyGrb'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0312_scipy.csv',  'sciPy'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0312_networkx.csv', 'networkX')],
+                    'amazon-0312 (|V|=400,727; |E|=3,200,440)', 'amazon-0312.pdf', False, False)
 
-draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0601_pygraphblas.csv', 'pyGrb'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0601_scipy.csv',  'sciPy'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0601_networkx.csv', 'networkX')],
-                'amazon-0601 (|V|=403,394; |E|=3,387,388)', 'amazon-0601.pdf', False)
+    draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0505_pygraphblas.csv', 'pyGrb'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0505_scipy.csv',  'sciPy'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0505_networkx.csv', 'networkX')],
+                    'amazon-0505 (|V|=410,236; |E|=3,356,824)', 'amazon-0505.pdf', False, False)
 
-draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/com/com-Youtube_pygraphblas.csv', 'pyGrb'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/com/com-Youtube_scipy.csv',  'sciPy'),
-                 ('../../../benchmarks/LABasedGraphAlgorithms/output/com/com-Youtube_networkx.csv', 'networkX')],
-                'com-Youtube (|V|=1,134,890; |E|=2,987,624)', 'com-Youtube.pdf', True)
+    draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0601_pygraphblas.csv', 'pyGrb'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0601_scipy.csv',  'sciPy'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/amazon/amazon-0601_networkx.csv', 'networkX')],
+                    'amazon-0601 (|V|=403,394; |E|=3,387,388)', 'amazon-0601.pdf', False, False)
+
+    draw_benchmarks([('../../../benchmarks/LABasedGraphAlgorithms/output/com/com-Youtube_pygraphblas.csv', 'pyGrb'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/com/com-Youtube_scipy.csv',  'sciPy'),
+                    ('../../../benchmarks/LABasedGraphAlgorithms/output/com/com-Youtube_networkx.csv', 'networkX')],
+                    'com-Youtube (|V|=1,134,890; |E|=2,987,624)', 'com-Youtube.pdf', True, True)
