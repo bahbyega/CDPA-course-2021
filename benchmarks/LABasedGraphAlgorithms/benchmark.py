@@ -2,7 +2,6 @@ import os
 import time
 
 from random import choice
-from scipy.sparse import data
 
 from src.hw_2.Graphs import UnweightedGraph, WeightedGraph
 from src.hw_2.grb_algorithms import *
@@ -11,9 +10,9 @@ from src.hw_2.std_algorithms import *
 
 
 DATASETS_PATH = os.path.join(
-    os.getcwd(), 'benchmarks/LABasedGraphAlgorithms/datasets/')
+    os.getcwd(), 'LABasedGraphAlgorithms/datasets/')
 OUTPUT_PATH = os.path.join(
-    os.getcwd(), 'benchmarks/LABasedGraphAlgorithms/output/')
+    os.getcwd(), 'LABasedGraphAlgorithms/output/')
 
 
 def measure_grb_runtime(graph_unweighted, graph_weighted, src_vertex):
@@ -80,8 +79,10 @@ def measure_std_runtime(graph, src_vertex):
 
 
 def graph_algorithms_benchmark():
-    datasets = ['ca-AstroPh', 'ca-CondMat', 'ca-HepTh', 'amazon-0302']
-    count_of_iterations = 10
+    datasets = ['ca-AstroPh', 'ca-CondMat', 'ca-HepTh',
+                'amazon-0302', 'amazon-0312', 'amazon-0505', 'amazon-0601'
+                'com-Youtube']
+    count_of_iterations = 5
 
     for dataset in datasets:
         dataset_type = dataset.split('-')[0]
