@@ -44,9 +44,7 @@ def perform_level_bfs(graph, src_vertex):
 def perform_triangles_count(graph):
     """
     Computes the number of triangles in the graph.
-
     graph: undirected graph
-
     return: (int) number of triangles
     """
     # takes lower or upper triangular portion of adj matrix
@@ -54,8 +52,10 @@ def perform_triangles_count(graph):
         res_matr = Matrix.sparse(INT64, graph.matrix.nrows, graph.matrix.nrows)
 
         with semiring.PLUS_TIMES_INT64:
-            return adj_matrix_part.mxm(
-                adj_matrix_part, mask=adj_matrix_part).reduce_int()
+            res_matr = adj_matrix_part.mxm(
+                adj_matrix_part, mask=adj_matrix_part)
+
+        return res_matr.reduce_int()
 
     lower_matr = graph.matrix.tril()
     upper_matr = graph.matrix.triu()

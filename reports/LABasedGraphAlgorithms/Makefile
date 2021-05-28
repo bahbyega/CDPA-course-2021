@@ -9,9 +9,9 @@ all: report
 report:
 	@echo 'Report generation has started.'
 	cd images
-	@echo 'Figures generation is started.'
+	@echo 'Figures generation has started.'
 	python draw.py
-	@echo 'Figures generation is finished.'
+	@echo 'Figures generation has finished.'
 	cd ../
 	@echo '--------------------------First step.--------------------------'
 	pdflatex $(DOCNAME).tex

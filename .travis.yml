@@ -44,7 +44,7 @@ jobs:
 
       before_install:
         - sudo apt-get -qq update
-        - sudo apt-get install -y texlive-base texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-lang-cyrillic
+        - sudo apt-get install -y texlive-base texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-lang-cyrillic texlive-science
         - python -m pip install -U pip
         - python -m pip install -U matplotlib
         - python -m pip install -U pandas

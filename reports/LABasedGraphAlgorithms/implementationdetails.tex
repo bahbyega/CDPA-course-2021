@@ -1,0 +1,172 @@
+\section{Детали реализации}
+
+Для алгоритмов, использующих pygraphblas, приведен псевдокод в листингах~\ref{bfs_pygrb},\ref{bford_pygrb},\ref{tri_pygrb}. 
+Алгоритмы поиска в ширину и подсчета треугольников на SciPy похожим образом представляются в виде псевдокода, поэтому в 
+листингах~\ref{bfs_SciPy},\ref{tri_SciPy} приводится код основных частей алгоритмов, которые синтаксически отличаются от кода, 
+использующего pygraphblas. Для Беллмана-Форда на SciPy вызывается библиотечная функция (листинг~\ref{bford_SciPy}). Также 
+библиотечные функции вызываются для алгоритмов, использующих NetworkX (листинги~\ref{bfs_std},\ref{tri_std},\ref{bford_std}.
+
+
+\begin{minipage}{0.46\textwidth}
+\begin{algorithm}[H]
+\centering
+\caption{(pygraphblas)\\Поиск в ширину. Псевдокод.}\label{bfs_pygrb}
+\begin{verbatim}
+# Input: A - adj matrix NxN
+#        s - source vertex
+# Output: v
+
+v = [0, ... , 0]
+q = [False, ... , False]
+q[s] = True
+level = 1
+
+while level <= N and q
+    v<q> = level  # mask q
+    q = [False, ... , False]
+    q<v> = q x A  # lor-land sem.
+    level++
+\end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+\begin{minipage}{0.46\textwidth}
+\begin{algorithm}[H]
+\centering
+\caption{(pygraphblas)\\Беллман-форд. Псевдокод.}\label{bford_pygrb}
+\begin{verbatim}
+# Input: A - adj matrix NxN
+#        s - source vertex
+# Output: v
+
+# check if graph is weighted
+
+v = [inf, ... , inf]
+v[s] = 0
+
+for k = 0 to N-1:
+    v = v min.+ A 
+    
+    # break if v not changing
+    
+\end{verbatim}
+\end{algorithm}
+\end{minipage}\par
+\begin{minipage}{0.96\textwidth}
+\begin{algorithm}[H]
+    \centering
+    \caption{(pygraphblas) Подсчет треугольников.}\label{tri_pygrb}
+    \begin{verbatim}
+    # Input: A - adj matrix
+    # Output: r
+    
+    # check if graph is undirected
+    
+    # Sandia algorithm
+    L = tril(A)
+    R = L x L  # using mask L
+    r = sum(R)
+    \end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+
+\begin{minipage}{0.46\textwidth}
+\begin{algorithm}[H]
+\centering
+\caption{(SciPy)\\Поиск в ширину. Основная часть.}\label{bfs_SciPy}
+\begin{verbatim}
+# initialize vects ...
+not_empty = True; level = 1
+while not_empty and\
+level <= n_verts:
+    for i in range(n_verts):
+        if (found_nodes_vect[i]):
+            res_vect[i] = level
+
+    found_nodes_vect =\ 
+        ((res_vect @ graph > 0)\
+        - res_vect) > 0
+
+    not_empty =\ 
+        found_nodes_vect\ 
+            .sum() > 0
+    level += 1
+# ... 
+\end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+\begin{minipage}{0.46\textwidth}
+\begin{algorithm}[H]
+\centering
+\caption{(SciPy)\\Подсчет треугольников.Основная часть.}\label{tri_SciPy}
+\begin{verbatim}
+# load lower portion 
+# of adj matrix as
+# adj_matrix_part ...
+
+def triangular_adj_matr_count\
+(adj_matrix_part):
+    res_matr = adj_matrix_part\
+        .multiply(adj_matrix_part\
+        *adj_matrix_part)
+        return int(res_matr.sum())
+# ...
+    
+    
+    
+    
+
+
+\end{verbatim}
+\end{algorithm}
+\end{minipage}
+
+\begin{minipage}{0.96\textwidth}
+\begin{algorithm}[H]
+    \centering
+    \caption{(SciPy) Беллман-Форд.}\label{bford_SciPy}
+    \begin{verbatim}
+    # from scipy.sparse import csgraph
+    def sp_bellman_ford(graph, src_vertex):
+        return csgraph.bellman_ford(graph, indices=src_vertex,
+                                return_predecessors=False)
+    \end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+
+\begin{minipage}{0.96\textwidth}
+\begin{algorithm}[H]
+    \centering
+    \caption{(NetworkX) Поиск в ширину, стандатная реализация.}\label{bfs_std}
+    \begin{verbatim}
+    # import networkx as nx
+    def std_bfs(graph, src_vertex):
+        res = nx.single_source_shortest_path_length(graph, src_vertex)
+        return [dist+1 for _, dist in sorted(res.items())]
+    \end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+
+\begin{minipage}{0.96\textwidth}
+\begin{algorithm}[H]
+    \centering
+    \caption{(NetworkX) Подсчет треугольников, стандатная реализация.}\label{tri_std}
+    \begin{verbatim}
+    def std_triangles_count(graph):
+        if nx.is_directed(graph):
+            raise Exception("Graph is not undirected")
+        return sum(nx.triangles(graph).values()) // 3
+    \end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+
+\begin{minipage}{0.96\textwidth}
+\begin{algorithm}[H]
+    \centering
+    \caption{(NetworkX) Беллман-Форд стандатная реализация.}\label{bford_std}
+    \begin{verbatim}
+    def std_bellman_ford(graph, src_vertex):
+        res = nx.single_source_bellman_ford_path_length(graph, src_vertex)
+        return [dist for _, dist in sorted(res.items())]
+    \end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
