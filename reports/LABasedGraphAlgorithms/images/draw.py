@@ -1,13 +1,15 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import random as rnd
 
 from matplotlib.ticker import ScalarFormatter
 from matplotlib.ticker import FormatStrFormatter
 
 
 def draw_bar(file, label, axs, position, bar_height, with_triangle_count):
+    '''
+    Draws bar chart for information in benchmark result file
+    '''
     df = pd.read_csv(file)
 
     alg_means = list(df.mean(axis=0))
@@ -26,6 +28,9 @@ def draw_bar(file, label, axs, position, bar_height, with_triangle_count):
 
 
 def draw_benchmarks(file_list, title, out, with_triangle_count, logscale):
+    '''
+    Draws benchmark results from csv files provided with file_list
+    '''
     fig = plt.figure()
     axs = plt.axes()
 
