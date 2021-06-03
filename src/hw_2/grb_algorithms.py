@@ -5,6 +5,8 @@ from pygraphblas import (
     Matrix,
     Vector,
     semiring,
+    Accum,
+    binaryop,
     descriptor
 )
 
@@ -42,9 +44,7 @@ def perform_level_bfs(graph, src_vertex):
 def perform_triangles_count(graph):
     """
     Computes the number of triangles in the graph.
-
     graph: undirected graph
-
     return: (int) number of triangles
     """
     # takes lower or upper triangular portion of adj matrix
@@ -80,16 +80,14 @@ def perform_bellman_ford(graph, src_vertex):
     """
     if not graph.matrix.type == FP64:
         raise Exception("Graph is not weighted")
-        return
 
     res_vect = Vector.sparse(FP64, graph.matrix.nrows)
     res_vect[src_vertex] = 0
 
-    with semiring.MIN_PLUS_FP64:
+    with semiring.MIN_PLUS, Accum(binaryop.MIN):
         for _ in range(graph.matrix.nrows):
             found_vect = res_vect.dup()
-            res_vect = res_vect.vxm(
-                graph.matrix, accum=FP64.MIN)
+            res_vect @= graph.matrix
 
             if found_vect.iseq(res_vect):
                 break

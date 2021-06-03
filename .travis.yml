@@ -33,9 +33,23 @@ jobs:
         - conda config --append channels conda-forge # for pygraphblas
         - conda info -a
 
-        - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest pygraphblas scipy networkx
+        - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest pygraphblas scipy networkx matplotlib
         - conda activate test-environment
       
       script:
         - python -m pytest
 
+    - language: generic
+      sudo: required
+
+      before_install:
+        - sudo apt-get -qq update
+        - sudo apt-get install -y texlive-base texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-lang-cyrillic texlive-science
+        - python -m pip install -U pip
+        - python -m pip install -U matplotlib
+        - python -m pip install -U pandas
+        - python -m pip install -U numpy
+      
+      script:
+        - cd reports/LABasedGraphAlgorithms
+        - make report
