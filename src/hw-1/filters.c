@@ -9,7 +9,7 @@ double gaussian_blur_kernel_5x5[5][5] =
     { 1, 4,  6,  4,  1 }
 }; // divide by 256
 
-float edges_kernel_5x5[5][5] =
+double edges_kernel_5x5[5][5] =
 {
    { 0,  0, -1,  0,  0 },
    { 0,  0, -1,  0,  0 },
@@ -245,7 +245,7 @@ GdkPixbuf *apply_filter_parallel(const GdkPixbuf *pixbuf, double *kernel,
 /**
  * Initial version of GPGPU filtering
  **/ 
-GdkPixbuf *apply_filter_GPGPU(GdkPixbuf *pixbuf, float *kernel,
+GdkPixbuf *apply_filter_GPGPU(GdkPixbuf *pixbuf, double *kernel,
                         gint ker_width, gint ker_height __attribute__((unused)),
                         double factor, double bias)
 {
@@ -275,7 +275,7 @@ GdkPixbuf *apply_filter_GPGPU(GdkPixbuf *pixbuf, float *kernel,
     guint8 *res_pixbuf = gdk_pixbuf_get_pixels_with_length(result, &pixbuf_size);
 
     host_program(src_pixbuf, res_pixbuf, (size_t)pixbuf_size, width, height, 
-                kernel, ker_width, rowstride, channels, (float)factor, (float)bias);
+                kernel, ker_width, rowstride, channels, (double)factor, (double)bias);
 
     return result;
 }

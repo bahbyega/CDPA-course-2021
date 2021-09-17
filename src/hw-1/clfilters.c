@@ -5,12 +5,12 @@ void host_program(guint8 *src_pixbuf,
                 size_t pixbuf_size,
                 int img_width,
                 int img_height,
-                float *filter_kernel, // float cause my gpu doesn't work with doubles
+                double *filter_kernel,
                 int filter_kernel_size,
                 int rowstride,
                 int channels,
-                float factor,
-                float bias)
+                double factor,
+                double bias)
 {
     // read the kernel
     FILE *fp;
@@ -132,7 +132,7 @@ void host_program(guint8 *src_pixbuf,
     }                                        
 
     cl_mem filter_kernel_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                                sizeof(float) * filter_kernel_size * filter_kernel_size,
+                                                sizeof(double) * filter_kernel_size * filter_kernel_size,
                                                 filter_kernel, &err);
     if (err != CL_SUCCESS)
     {
@@ -148,8 +148,8 @@ void host_program(guint8 *src_pixbuf,
         clSetKernelArg(kernel, 5, sizeof(cl_int), &filter_kernel_size) ||
         clSetKernelArg(kernel, 6, sizeof(cl_int), &rowstride) ||
         clSetKernelArg(kernel, 7, sizeof(cl_int), &channels) ||
-        clSetKernelArg(kernel, 8, sizeof(cl_float), &factor) ||
-        clSetKernelArg(kernel, 9, sizeof(cl_float), &bias)
+        clSetKernelArg(kernel, 8, sizeof(cl_double), &factor) ||
+        clSetKernelArg(kernel, 9, sizeof(cl_double), &bias)
         != CL_SUCCESS)
     {
         g_print("Couldn't set kernel arguments. Error code=%d\n", err);
@@ -158,10 +158,10 @@ void host_program(guint8 *src_pixbuf,
 
     // execution
     size_t global_work_size = img_height * img_width;
-    size_t local_work_size = 256;
+    
 
     err = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
-                                 &global_work_size, &local_work_size, 0, NULL, NULL);
+                                 &global_work_size, 0, 0, NULL, NULL);
     if (err != CL_SUCCESS)
     {
         g_print("Couldn't enqueue kernel command. Error code=%d\n", err);
@@ -179,7 +179,7 @@ void host_program(guint8 *src_pixbuf,
         exit(1);
     }
 
-    clFinish(command_queue);
+    //clFinish(command_queue);
 
     // cleaning up
     clReleaseMemObject(src_image_buffer);

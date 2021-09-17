@@ -4,6 +4,7 @@
 #define CL_TARGET_OPENCL_VERSION 120
 
 #include <gtk/gtk.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <CL/cl.h>
@@ -13,11 +14,11 @@ void host_program(guint8 *,
                 size_t ,
                 int ,
                 int ,
-                float *, 
+                double *, 
                 int ,
                 int ,
                 int ,
-                float ,
-                float);
+                double ,
+                double);
 
 #endif /* __CLFILTERS__ */
