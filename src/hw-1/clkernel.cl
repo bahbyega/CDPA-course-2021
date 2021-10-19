@@ -38,10 +38,5 @@ __kernel void apply_filter(__global uchar *src_buffer,
         out_pixel[0] = min(max((int)(factor * red + bias),   0), 255);
         out_pixel[1] = min(max((int)(factor * green + bias), 0), 255);
         out_pixel[2] = min(max((int)(factor * blue + bias),  0), 255);
-
-        // // debug code
-        // out_pixel[0] = 100;
-        // out_pixel[1] = 100;
-        // out_pixel[2] = 100;
     }
 }
