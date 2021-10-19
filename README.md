@@ -54,7 +54,79 @@ $ ./src/hw-1/build/out
 
 > Расширить приложение возможностью отображать одновременно два изображения: до и после применения фильтра. Предусмотреть возможность сохранять результат применения фильтра.
 
+
 ### Task 1.4
 > Реализовать применение матричных фильтров с использованием GPGPU. Интегрировать с разработанным графическим интерфейсом. Предусмотреть возможность применения нескольких фильтров последовательно.
+
+---
+
+## Homework II
+[![Build Status](https://www.travis-ci.com/bahbyega/CDPA-course-2021.svg?branch=Task-2.1)](https://www.travis-ci.com/bahbyega/CDPA-course-2021)
+
+### Requirements
+- `Conda` package manager is required for installing python packages. You can install it via [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
+
+### Executing
+Add package channel for `pygraphblas`:
+```
+$ conda config --append channels conda-forge
+```
+Activate testing environment:
+```
+$ conda create -q -n test-env python=3.8 pyghraphblas pytest scipy networkx
+$ conda activate test-env
+```
+Run program:
+```
+usage: main.py [-h] [-w] [--blas] [--scipy] [--std]
+               [-p {level_bfs,triangles_count,bellman_ford}]
+               graph_filepath
+
+
+Perform algorithms on graphs
+
+positional arguments:
+  graph_filepath        Path to your graph.mtx file in MatrixMarket format
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -w, --weighted        Specify this flag if graph is weighted
+  --blas                Specify this flag if you want to run algorithms with
+                        pygraphblas
+  --scipy               Specify this flag if you want to run algorithms with
+                        scipy
+  --std                 Specify this flag if you want to run algorithms with
+                        standard library
+  -p {level_bfs,triangles_count,bellman_ford}, --perform {level_bfs,triangles_count,bellman_ford}
+                        Algorithm to perform: level_bfs, triangles_count,
+                        bellman_ford
+```
+Example:
+```
+Run Bellman-Ford algorithm implemented with pygraphblas on weighted graph from test_data: 
+$ python main.py --blas -w -p bellman_ford tests/test_data/weighted_graph.mtx
+```
+
+### Testing
+To manually run tests activate testing environment and run:
+```
+$ python -m pytest
+```
+
+### Task 2.1
+
+> Необходимо выбрать и реализовать минимум 3 различных алгоритма (требующих различных операций) анализа графов с использованием операций линейной алгебры на (py)graphblas.
+
+### Task 2.2
+
+> Реализовать выбранные алгоритмы на sciPy.
+
+### Task 2.3
+
+> Реализовать выбранные алгоритмы на стандартной библиотеке для анализа графов.
+
+### Task 2.4
+
+> Сравнить производительность полученных реализаций, составить отчёт.
 
 ---

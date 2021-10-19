@@ -1,0 +1,31 @@
+\documentclass[a4paper,12pt]{article} 
+
+% Language, endcoding, font
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english,russian]{babel}
+
+% Indentation, paragraphs, line spacing
+\usepackage[left=30mm, top=20mm, right=15mm, bottom=20mm,nohead, includefoot,footskip=35pt]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage[pdftex]{graphicx}
+\usepackage[colorlinks=false,unicode=true]{hyperref}
+\usepackage[export]{adjustbox}
+\usepackage{subcaption}
+\usepackage{algorithm}
+
+\begin{document}
+\input{titlepage.tex}
+\input{introduction.tex}
+\input{implementationdetails.tex}
+\input{evaluation.tex}
+\input{conclusion.tex}
+
+\bibliographystyle{abbrv}
+\bibliography{bibliography}
+
+\end{document}

@@ -17,3 +17,41 @@ jobs:
       script: 
         - make
 
+
+    - language: python
+      python: "3.8"
+
+      install:
+        - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+            wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+          else
+            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+          fi
+        - bash miniconda.sh -b -p $HOME/miniconda
+        - source "$HOME/miniconda/etc/profile.d/conda.sh"
+        - hash -r
+        - conda config --set always_yes yes --set changeps1 no
+        - conda update -q conda
+        - conda config --append channels conda-forge # for pygraphblas
+        - conda info -a
+
+        - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest pygraphblas scipy networkx matplotlib
+        - conda activate test-environment
+      
+      script:
+        - python -m pytest
+
+    - language: generic
+      sudo: required
+
+      before_install:
+        - sudo apt-get -qq update
+        - sudo apt-get install -y texlive-base texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-lang-cyrillic texlive-science
+        - python -m pip install -U pip
+        - python -m pip install -U matplotlib
+        - python -m pip install -U pandas
+        - python -m pip install -U numpy
+      
+      script:
+        - cd reports/LABasedGraphAlgorithms
+        - make report

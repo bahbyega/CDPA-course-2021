@@ -1,0 +1,225 @@
+\section{Детали реализации}
+Каждый из алгоритмов оперирует над вершинами и ребрами графа, которые имеют различное представление в упомянутых 
+библиотеках. В pygraphblas и SciPy граф представлен в разреженном матричном виде. Networkx использует вложенные 
+словари.
+
+Алгоритмы получают на вход граф в соответствующем реализации представлении. Также для поиска в ширину и алгоритма 
+Беллмана-Форда передается начальная вершина, от которой происходит отсчет.
+
+Выходными данными являются, в случае поиска ширину, --- вектор посещенных вершин, значениями которого являются 
+уровни обхода графа, на которых находится соответствующая вершина. В случае подсчета треугольников --- общее 
+количество треугольников (циклов длины 3) в графе, в случае алгоритма Беллмана-Форда --- вектор кратчайших 
+расстояний от начальной вершины до всех остальных (достижимых) вершин.
+
+Поговорим подробнее о реализации каждого алгоритма.
+
+Реализация на pygraphblas использует GraphBLAS API, предоставляющий элементы линейной алгебры для построения 
+графовых алгоритмов.
+
+Так, поиск в ширину построен на векторно-матричном умножении. Умножая вектор \emph{v} булевых значений 
+текущих вершин в обходе, на матрицу смежности \emph{A} графа мы можем получить булев вектор, в котором на 
+\emph{i}-м месте будет храниться информация о достижимости \emph{i}-й вершины от уже найденных вершин. 
+Умножение \emph{v} на \emph{A}$^2$ даст вектор достижимых вершин на расстоянии двух переходов от текущих 
+вершин и так далее. Векторно-матричное умножение при этом происходит в булевом полукольце, где операции 
+поэлементного сложения и умножения работают со значениями True и False. Остается лишь на каждом шаге присваивать 
+значение счетчика уровня обхода тем вершинам, что были помечены достижимыми.
+
+Подсчет треугольников основан на умножении матриц. В наивной реализации можно трижды перемножить матрицу смежности 
+на саму себя и получить количество циклов длины 3 для каждой вершины на соответствующей строчке главной диагонали. 
+После чего сложить элементы главной диагонали и поделить сумму на 6, чтобы получить общее число треугольников в 
+графе. Однако такой подход неэффективен, так как с каждым умножением матрица становится плотнее и ее дальнейшее 
+умножение на саму себя начинает занимать большее число операций. Реализованная версия получает сначала нижнюю 
+треугольную часть матрицы, а затем умножает ее на саму себя, при этом применяя маску, то есть считаются элементы 
+только в тех i-х и j-х ячейках, что были в первоначальной треугольной матрице. После чего полученные значения 
+складываются, и эта сумма является общим числом треугольников в графе.
+
+Алгоритм Беллмана-Форда так же, как и поиск в ширину основан на векторно-матричном умножении. Главное отличие 
+здесь --- использование мин-плюс полукольца, в котором классические операции сложения и умножения заменяются 
+на операции взятия минимума и сложения соответственно. 
+
+Подробнее эти алгоритмы приведены в псевдокоде в листингах~\ref{bfs_pygrb},\ref{bford_pygrb},\ref{tri_pygrb}.
+
+Алгоритмы поиска в ширину и подсчета треугольников на SciPy были реализованы на тех же принципах линейной алгебры. 
+Использование булевых полуколец было заменено на сравнение полученных значений с нулем. В
+листингах~\ref{bfs_SciPy},\ref{tri_SciPy} приводится код основных частей алгоритмов, которые синтаксически 
+отличаются от кода, использующего pygraphblas.
+
+Для Беллман-Форда на SciPy вызывается библиотечная функция (листинг~\ref{bford_SciPy}) из модуля scipy.sparse.csgraph 
+(compressed sparse graph routines). В ней \emph{n - 1} раз расчитывается минимальная дистанция до каждой вершины, 
+где \emph{n} --- число вершин в графе. После чего проверяется наличие отрицательных циклов в графе с помощью еще 
+одной итерации по всем вершинам графа.
+
+Также библиотечные функции вызываются для алгоритмов, использующих NetworkX 
+(листинги~\ref{bfs_std},\ref{tri_std},\ref{bford_std}). Поиск в ширину в NetworkX реализован стандартным образом. 
+В то время как Беллман-Форд использует улучшенную версию алгоритма под названием SPFA (Shortest Path Faster Algorithm), 
+в которой, в отличие от стандартной реализации, используется очередь для хранения вершин, расстояние до которых 
+уже было пересчитано. Вершины из этой очереди просматриваются первыми. В подсчете треугольников в алгоритме 
+NetworkX каждый треугольник считается три раза, по одному разу в каждой вершине. Алгоритм возвращает словарь, 
+сопоставляющий вершине количество треугольников в ней, после чего значения суммируются и делятся на три для 
+получения общего числа треугольников в графе.
+
+\vspace{10px}
+
+\begin{minipage}{0.46\textwidth}
+\begin{algorithm}[H]
+\centering
+\caption{(pygraphblas)\\Поиск в ширину. Псевдокод.}\label{bfs_pygrb}
+\begin{verbatim}
+# Input: A - adj matrix NxN
+#        s - source vertex
+# Output: v
+
+v = [0, ... , 0]
+q = [False, ... , False]
+q[s] = True
+level = 1
+
+while level <= N and q
+    v<q> = level  # mask q
+    q = [False, ... , False]
+    q<v> = q x A  # lor-land sem.
+    level++
+\end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+\begin{minipage}{0.46\textwidth}
+\begin{algorithm}[H]
+\centering
+\caption{(pygraphblas)\\Беллман-форд. Псевдокод.}\label{bford_pygrb}
+\begin{verbatim}
+# Input: A - adj matrix NxN
+#        s - source vertex
+# Output: v
+
+# check if graph is weighted
+
+v = [inf, ... , inf]
+v[s] = 0
+
+for k = 0 to N-1:
+    v = v min.+ A 
+    
+    # break if v not changing
+    
+\end{verbatim}
+\end{algorithm}
+\end{minipage}\par
+\begin{minipage}{0.96\textwidth}
+\begin{algorithm}[H]
+    \centering
+    \caption{(pygraphblas) Подсчет треугольников.}\label{tri_pygrb}
+    \begin{verbatim}
+    # Input: A - adj matrix
+    # Output: r
+    
+    # check if graph is undirected
+    
+    # Sandia algorithm
+    L = tril(A)
+    R = L x L  # using mask L
+    r = sum(R)
+    \end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+
+\begin{minipage}{0.46\textwidth}
+\begin{algorithm}[H]
+\centering
+\caption{(SciPy)\\Поиск в ширину. Основная часть.}\label{bfs_SciPy}
+\begin{verbatim}
+# initialize vects ...
+not_empty = True; level = 1
+while not_empty and\
+level <= n_verts:
+    for i in range(n_verts):
+        if (found_nodes_vect[i]):
+            res_vect[i] = level
+
+    found_nodes_vect =\ 
+        ((res_vect @ graph > 0)\
+        - res_vect) > 0
+
+    not_empty =\ 
+        found_nodes_vect\ 
+            .sum() > 0
+    level += 1
+# ... 
+\end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+\begin{minipage}{0.46\textwidth}
+\begin{algorithm}[H]
+\centering
+\caption{(SciPy)\\Подсчет треугольников.Основная часть.}\label{tri_SciPy}
+\begin{verbatim}
+# load lower portion 
+# of adj matrix as
+# adj_matrix_part ...
+
+def triangular_adj_matr_count\
+(adj_matrix_part):
+    res_matr = adj_matrix_part\
+        .multiply(adj_matrix_part\
+        *adj_matrix_part)
+        return int(res_matr.sum())
+# ...
+    
+    
+    
+    
+
+
+\end{verbatim}
+\end{algorithm}
+\end{minipage}
+
+\begin{minipage}{0.96\textwidth}
+\begin{algorithm}[H]
+    \centering
+    \caption{(SciPy) Беллман-Форд.}\label{bford_SciPy}
+    \begin{verbatim}
+    # from scipy.sparse import csgraph
+    def sp_bellman_ford(graph, src_vertex):
+        return csgraph.bellman_ford(graph, indices=src_vertex,
+                                return_predecessors=False)
+    \end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+
+\begin{minipage}{0.96\textwidth}
+\begin{algorithm}[H]
+    \centering
+    \caption{(NetworkX) Поиск в ширину, стандатная реализация.}\label{bfs_std}
+    \begin{verbatim}
+    # import networkx as nx
+    def std_bfs(graph, src_vertex):
+        res = nx.single_source_shortest_path_length(graph, src_vertex)
+        return [dist+1 for _, dist in sorted(res.items())]
+    \end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+
+\begin{minipage}{0.96\textwidth}
+\begin{algorithm}[H]
+    \centering
+    \caption{(NetworkX) Подсчет треугольников, стандатная реализация.}\label{tri_std}
+    \begin{verbatim}
+    def std_triangles_count(graph):
+        if nx.is_directed(graph):
+            raise Exception("Graph is not undirected")
+        return sum(nx.triangles(graph).values()) // 3
+    \end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
+
+\begin{minipage}{0.96\textwidth}
+\begin{algorithm}[H]
+    \centering
+    \caption{(NetworkX) Беллман-Форд стандатная реализация.}\label{bford_std}
+    \begin{verbatim}
+    def std_bellman_ford(graph, src_vertex):
+        res = nx.single_source_bellman_ford_path_length(graph, src_vertex)
+        return [dist for _, dist in sorted(res.items())]
+    \end{verbatim}
+\end{algorithm}
+\end{minipage}\hfill
