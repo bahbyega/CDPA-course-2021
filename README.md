@@ -13,12 +13,18 @@ First, make sure the following is installed on your machine:
 - `gcc` compiler :)
 - `gtk3` library for GUI
 - `OpenMP` library for parallelism
+- `OpenCL` for operations with GPU
 
 To install gtk3 on debian based distros run 
 ```
 sudo apt install libgtk-3-dev
 ```
 Most likely OpenMP is already installed by default and will compile with gcc. Although, if it's not the case install it with: `sudo apt install libomp-dev`
+OpenCL installation is different with each graphics card manufacturer. Although, you still need the following headers to compile the application:
+```
+$ sudo apt -y install opencl-headers
+$ sudo apt -y install ocl-icd-opencl-dev
+```
 
 ### Build
 To build the application simply do
@@ -47,6 +53,10 @@ $ ./src/hw-1/build/out
 ### Task 1.3
 
 > Расширить приложение возможностью отображать одновременно два изображения: до и после применения фильтра. Предусмотреть возможность сохранять результат применения фильтра.
+
+
+### Task 1.4
+> Реализовать применение матричных фильтров с использованием GPGPU. Интегрировать с разработанным графическим интерфейсом. Предусмотреть возможность применения нескольких фильтров последовательно.
 
 ---
 

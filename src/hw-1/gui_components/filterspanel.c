@@ -47,6 +47,12 @@ GtkWidget *setup_predefined_filters_page(GdkPixbuf *pixbuf, const gchar *filenam
     GtkWidget *sharp_btn  = gtk_button_new_with_label("Apply sharpening");
     GtkWidget *edge_btn   = gtk_button_new_with_label("Apply finding edges");
     GtkWidget *mblur_btn  = gtk_button_new_with_label("Apply motion blur");
+    
+    GtkWidget     *apply_times_label  = gtk_label_new ("Apply filter n times:");
+    GtkAdjustment *apply_times_config = gtk_adjustment_new(1, 1, 10, 1, 0, 0);
+    GtkWidget     *apply_times_btn    = gtk_spin_button_new(apply_times_config, 1.0, 0);
+
+    GtkWidget *use_gpu_btn = gtk_check_button_new_with_label("Use GPU");
 
     gtk_box_pack_start(GTK_BOX(box), flip_x_btn, TRUE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box), flip_y_btn, TRUE, FALSE, 5);
@@ -54,11 +60,16 @@ GtkWidget *setup_predefined_filters_page(GdkPixbuf *pixbuf, const gchar *filenam
     gtk_box_pack_start(GTK_BOX(box), sharp_btn, TRUE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box), edge_btn, TRUE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box), mblur_btn, TRUE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(box), apply_times_label, TRUE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(box), apply_times_btn, TRUE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(box), use_gpu_btn, TRUE, FALSE, 5);
 
     ImageFileData *data;
     data = (ImageFileData *)calloc(1, sizeof(ImageFileData));
     data->pixbuf = pixbuf;
     data->filename = filename;
+    data->apply_times_btn = GTK_SPIN_BUTTON(apply_times_btn);
+    data->use_gpu_btn = GTK_CHECK_BUTTON(use_gpu_btn);
 
     g_signal_connect(G_OBJECT(flip_x_btn), "clicked", G_CALLBACK(on_flip_x_btn_click),
                      data);
@@ -191,17 +202,35 @@ void on_blur_btn_click(GtkWidget *caller
 {
     GdkPixbuf *src_pixbuf = ((ImageFileData *)data)->pixbuf;
     const gchar *filename = ((ImageFileData *)data)->filename;
+    
+    gint apply_times = gtk_spin_button_get_value_as_int(((ImageFileData *)data)->apply_times_btn);
+    gboolean use_gpu_flag 
+        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(((ImageFileData *)data)->use_gpu_btn));
 
     double *kernel = &gaussian_blur_kernel_5x5[0][0];
     gint    ker_width = 5, ker_height = 5;
     double  factor = 1/256.0, bias = 0.0;
 
-    GdkPixbuf *res_pixbuf = apply_filter_parallel(src_pixbuf,
-                                        kernel,
-                                        ker_width, ker_height,
-                                        factor, bias);
+    if (use_gpu_flag)
+    {
+        for (gint i = 0; i < apply_times; i++)
+        {
+            src_pixbuf = apply_filter_GPGPU(src_pixbuf,
+                                                kernel,
+                                                ker_width, ker_height,
+                                                factor, bias);
+        }
+    } else {
+        for (gint i = 0; i < apply_times; i++)
+        {
+            src_pixbuf = apply_filter_parallel(src_pixbuf,
+                                                kernel,
+                                                ker_width, ker_height,
+                                                factor, bias);
+        }
+    }
 
-    show_resulting_image_in_new_window(res_pixbuf, filename);
+    show_resulting_image_in_new_window(src_pixbuf, filename);
 }
 
 void on_sharp_btn_click(GtkWidget *caller
@@ -210,17 +239,35 @@ void on_sharp_btn_click(GtkWidget *caller
 {
     GdkPixbuf *src_pixbuf = ((ImageFileData *)data)->pixbuf;
     const gchar *filename = ((ImageFileData *)data)->filename;
+    
+    gint apply_times = gtk_spin_button_get_value_as_int(((ImageFileData *)data)->apply_times_btn);
+    gboolean use_gpu_flag 
+        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(((ImageFileData *)data)->use_gpu_btn));
 
     double *kernel = &sharpening_kernel_5x5[0][0];
     gint    ker_width = 5, ker_height = 5;
     double  factor = 1/9.0, bias = 0.0;
 
-    GdkPixbuf *res_pixbuf = apply_filter_parallel(src_pixbuf,
-                                        kernel,
-                                        ker_width, ker_height,
-                                        factor, bias);
+    if (use_gpu_flag)
+    {
+        for (gint i = 0; i < apply_times; i++)
+        {
+            src_pixbuf = apply_filter_GPGPU(src_pixbuf,
+                                                kernel,
+                                                ker_width, ker_height,
+                                                factor, bias);
+        }
+    } else {
+        for (gint i = 0; i < apply_times; i++)
+        {
+            src_pixbuf = apply_filter_parallel(src_pixbuf,
+                                                kernel,
+                                                ker_width, ker_height,
+                                                factor, bias);
+        }
+    }
 
-    show_resulting_image_in_new_window(res_pixbuf, filename);
+    show_resulting_image_in_new_window(src_pixbuf, filename);
 }
 
 void on_edges_btn_click(GtkWidget *caller
@@ -230,16 +277,34 @@ void on_edges_btn_click(GtkWidget *caller
     GdkPixbuf *src_pixbuf = ((ImageFileData *)data)->pixbuf;
     const gchar *filename = ((ImageFileData *)data)->filename;
 
+    gint apply_times = gtk_spin_button_get_value_as_int(((ImageFileData *)data)->apply_times_btn);
+    gboolean use_gpu_flag 
+        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(((ImageFileData *)data)->use_gpu_btn));
+
     double *kernel = &edges_kernel_5x5[0][0];
     gint    ker_width = 5, ker_height = 5;
     double  factor = 1.00, bias = 0.0;
 
-    GdkPixbuf *res_pixbuf = apply_filter_parallel(src_pixbuf,
-                                        kernel,
-                                        ker_width, ker_height,
-                                        factor, bias);
+    if (use_gpu_flag)
+    {
+        for (gint i = 0; i < apply_times; i++)
+        {
+            src_pixbuf = apply_filter_GPGPU(src_pixbuf,
+                                                kernel,
+                                                ker_width, ker_height,
+                                                factor, bias);
+        }
+    } else {
+        for (gint i = 0; i < apply_times; i++)
+        {
+            src_pixbuf = apply_filter_parallel(src_pixbuf,
+                                                kernel,
+                                                ker_width, ker_height,
+                                                factor, bias);
+        }
+    }
 
-    show_resulting_image_in_new_window(res_pixbuf, filename);
+    show_resulting_image_in_new_window(src_pixbuf, filename);
 }
 
 void on_mblur_btn_click(GtkWidget *caller
@@ -249,16 +314,34 @@ void on_mblur_btn_click(GtkWidget *caller
     GdkPixbuf *src_pixbuf = ((ImageFileData *)data)->pixbuf;
     const gchar *filename = ((ImageFileData *)data)->filename;
 
+    gint apply_times = gtk_spin_button_get_value_as_int(((ImageFileData *)data)->apply_times_btn);
+    gboolean use_gpu_flag 
+        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(((ImageFileData *)data)->use_gpu_btn));
+
     double *kernel = &motionblur_kernel_9x9[0][0];
     gint    ker_width = 9, ker_height = 9;
     double  factor = 1/9.00, bias = 0.0;
 
-    GdkPixbuf *res_pixbuf = apply_filter_parallel(src_pixbuf,
-                                        kernel,
-                                        ker_width, ker_height,
-                                        factor, bias);
+    if (use_gpu_flag)
+    {
+        for (gint i = 0; i < apply_times; i++)
+        {
+            src_pixbuf = apply_filter_GPGPU(src_pixbuf,
+                                                kernel,
+                                                ker_width, ker_height,
+                                                factor, bias);
+        }
+    } else {
+        for (gint i = 0; i < apply_times; i++)
+        {
+            src_pixbuf = apply_filter_parallel(src_pixbuf,
+                                                kernel,
+                                                ker_width, ker_height,
+                                                factor, bias);
+        }
+    }
 
-    show_resulting_image_in_new_window(res_pixbuf, filename);
+    show_resulting_image_in_new_window(src_pixbuf, filename);
 }
 
 void on_apply_btn_click(GtkWidget *caller

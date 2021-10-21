@@ -241,3 +241,41 @@ GdkPixbuf *apply_filter_parallel(const GdkPixbuf *pixbuf, double *kernel,
     
     return result;
 }
+
+/**
+ * Initial version of GPGPU filtering
+ **/ 
+GdkPixbuf *apply_filter_GPGPU(GdkPixbuf *pixbuf, double *kernel,
+                        gint ker_width, gint ker_height __attribute__((unused)),
+                        double factor, double bias)
+{
+    GdkColorspace colorspace = gdk_pixbuf_get_colorspace(pixbuf);
+    gboolean has_alpha       = gdk_pixbuf_get_has_alpha(pixbuf);
+    gint bits_per_sample     = gdk_pixbuf_get_bits_per_sample(pixbuf);
+    gint width               = gdk_pixbuf_get_width(pixbuf);
+    gint height              = gdk_pixbuf_get_height(pixbuf);
+    gint rowstride           = gdk_pixbuf_get_rowstride(pixbuf);
+    gint channels            = gdk_pixbuf_get_n_channels(pixbuf);
+
+    if (bits_per_sample != 8)
+    {
+        g_print("Couldn't load image for filtering\n");
+        return NULL;
+    }
+
+    GdkPixbuf *result = gdk_pixbuf_new(colorspace,
+                           has_alpha,
+                           bits_per_sample, 
+	                        width, 
+	                       height);
+
+    guint pixbuf_size;
+
+    guint8 *src_pixbuf = gdk_pixbuf_get_pixels(pixbuf);
+    guint8 *res_pixbuf = gdk_pixbuf_get_pixels_with_length(result, &pixbuf_size);
+
+    host_program(src_pixbuf, res_pixbuf, (size_t)pixbuf_size, width, height, 
+                kernel, ker_width, rowstride, channels, (double)factor, (double)bias);
+
+    return result;
+}
