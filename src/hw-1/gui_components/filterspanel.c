@@ -167,6 +167,9 @@ GtkWidget *setup_custom_filters_page(GdkPixbuf *pixbuf, const gchar *filename)
     return box;
 }
 
+/**
+ * Configures page where you can apply filters to a whole folder.
+ **/
 GtkWidget *setup_filters_for_folder_page()
 {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -357,106 +360,6 @@ void on_mblur_btn_click(GtkWidget *caller
     GdkPixbuf *out_pixbuf = apply_filter_service(src_pixbuf, &filter_data);
 
     show_resulting_image_in_new_window(out_pixbuf, filename);
-}
-
-void quick_message (GtkWindow *parent, gchar *message)
-{
-    GtkWidget *dialog, *label, *content_area;
-    GtkDialogFlags flags;
-
-    flags = GTK_DIALOG_DESTROY_WITH_PARENT;
-    dialog = gtk_dialog_new_with_buttons ("Message",
-                                        parent,
-                                        flags,
-                                        "_OK",
-                                        GTK_RESPONSE_NONE,
-                                        NULL);
-    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-    label = gtk_label_new (message);
-
-    g_signal_connect_swapped (dialog,
-                            "response",
-                            G_CALLBACK (gtk_widget_destroy),
-                            dialog);
-
-    gtk_container_add (GTK_CONTAINER (content_area), label);
-    gtk_widget_show_all (dialog);
-}
-
-gchar *get_new_filename(const gchar *src_filename) {
-    const gchar *appendix = "-(filtered).";
-    gchar *extension = strrchr(src_filename, '.') + 1;
-
-    gchar res_extension[strlen(extension + 1)];
-    if (strcmp(extension, "jpg") == 0) 
-    {
-        strcpy(res_extension, "jpeg");
-    }
-    else
-    {
-        strcpy(res_extension, extension);
-    }
-    
-    gchar *res_filename = g_new(gchar, strlen(src_filename) + strlen(appendix) + strlen(res_extension));
-    strcpy(res_filename, src_filename);
-    
-    // strip extension
-    gchar *filename_dot = strchr(res_filename, '.');
-    gint offset = filename_dot - res_filename;
-    res_filename[offset] = '\0';
-
-    // add appendix and extension
-    strcat(res_filename, appendix);
-    strcat(res_filename, res_extension);
-
-    return res_filename;
-}
-
-void get_pixbufs_from_images_in_a_folder(const gchar *src_folder, const gchar *out_folder, FilterData *filter_data)
-{
-    DIR *dp;
-    struct dirent *ep;
-    gchar filename[200];
-    GdkPixbuf *src_pixbuf;
-
-    dp = opendir(src_folder);
-    if (dp != NULL)
-    {
-        while ((ep = readdir(dp)))
-        {
-            if (ep->d_type == DT_REG || ep->d_type == DT_UNKNOWN)
-            {
-                if (strcmp(".", ep->d_name) != 0 && strcmp("..", ep->d_name) != 0)
-                {
-                    gchar *extension = strrchr(ep->d_name, '.') + 1;
-                    if (strcmp("bmp", extension) == 0 || 
-                        strcmp("png", extension) == 0 ||
-                        strcmp("jpg", extension) == 0)
-                    {
-                        strcpy(filename, src_folder);
-                        strcat(filename, "/");
-                        strcat(filename, ep->d_name);
-                        
-                        src_pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, -1, -1, TRUE, NULL);
-
-                        // if out folder specified
-                        if (strcmp("", out_folder) != 0) 
-                        {
-                            strcpy(filename, out_folder);
-                            strcat(filename, "/");
-                            strcat(filename, ep->d_name);
-                        }
-                        
-                        gchar *new_filename = get_new_filename(filename);
-                        save_filtering_result(src_pixbuf, new_filename, extension, filter_data);
-                    }
-                }
-            }
-        }
-        (void) closedir(dp);
-    }
-    else
-        perror("Couldn't open the directory");
 }
 
 void on_blur_folder_btn_click(GtkWidget *caller
@@ -829,4 +732,114 @@ void on_save_as_menu_item_click(GtkWidget *caller,
     }
 
     gtk_widget_destroy(dialog);
+}
+
+/**
+ * Shows quick message on screen (usually success message)
+ **/
+void quick_message (GtkWindow *parent, gchar *message)
+{
+    GtkWidget *dialog, *label, *content_area;
+    GtkDialogFlags flags;
+
+    flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    dialog = gtk_dialog_new_with_buttons ("Message",
+                                        parent,
+                                        flags,
+                                        "_OK",
+                                        GTK_RESPONSE_NONE,
+                                        NULL);
+    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+    label = gtk_label_new (message);
+
+    g_signal_connect_swapped (dialog,
+                            "response",
+                            G_CALLBACK (gtk_widget_destroy),
+                            dialog);
+
+    gtk_container_add (GTK_CONTAINER (content_area), label);
+    gtk_widget_show_all (dialog);
+}
+
+/**
+ * Creates new filename from src_filename (adds '-(filtered)' to file name)
+ **/
+gchar *get_new_filename(const gchar *src_filename) {
+    const gchar *appendix = "-(filtered).";
+    gchar *extension = strrchr(src_filename, '.') + 1;
+
+    gchar res_extension[strlen(extension + 1)];
+    if (strcmp(extension, "jpg") == 0) 
+    {
+        strcpy(res_extension, "jpeg");
+    }
+    else
+    {
+        strcpy(res_extension, extension);
+    }
+    
+    gchar *res_filename = g_new(gchar, strlen(src_filename) + strlen(appendix) + strlen(res_extension));
+    strcpy(res_filename, src_filename);
+    
+    // strip extension
+    gchar *filename_dot = strchr(res_filename, '.');
+    gint offset = filename_dot - res_filename;
+    res_filename[offset] = '\0';
+
+    // add appendix and extension
+    strcat(res_filename, appendix);
+    strcat(res_filename, res_extension);
+
+    return res_filename;
+}
+
+
+/**
+ * Parses src_folder for images and calls filter services to save images' pixbufs in out_folder
+ **/
+void get_pixbufs_from_images_in_a_folder(const gchar *src_folder, const gchar *out_folder, FilterData *filter_data)
+{
+    DIR *dp;
+    struct dirent *ep;
+    gchar filename[200];
+    GdkPixbuf *src_pixbuf;
+
+    dp = opendir(src_folder);
+    if (dp != NULL)
+    {
+        while ((ep = readdir(dp)))
+        {
+            if (ep->d_type == DT_REG || ep->d_type == DT_UNKNOWN)
+            {
+                if (strcmp(".", ep->d_name) != 0 && strcmp("..", ep->d_name) != 0)
+                {
+                    gchar *extension = strrchr(ep->d_name, '.') + 1;
+                    if (strcmp("bmp", extension) == 0 || 
+                        strcmp("png", extension) == 0 ||
+                        strcmp("jpg", extension) == 0)
+                    {
+                        strcpy(filename, src_folder);
+                        strcat(filename, "/");
+                        strcat(filename, ep->d_name);
+                        
+                        src_pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, -1, -1, TRUE, NULL);
+
+                        // if out folder specified
+                        if (strcmp("", out_folder) != 0) 
+                        {
+                            strcpy(filename, out_folder);
+                            strcat(filename, "/");
+                            strcat(filename, ep->d_name);
+                        }
+                        
+                        gchar *new_filename = get_new_filename(filename);
+                        apply_and_save_filter_service(src_pixbuf, new_filename, extension, filter_data);
+                    }
+                }
+            }
+        }
+        (void) closedir(dp);
+    }
+    else
+        perror("Couldn't open the directory");
 }

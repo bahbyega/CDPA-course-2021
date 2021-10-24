@@ -62,5 +62,6 @@ void on_save_as_menu_item_click(GtkWidget *, gpointer);
 double *parse_kernelstr_for_kernel(const char *, gint, gint);
 const char *generate_default_kernel_str(gint);
 void show_resulting_image_in_new_window(GdkPixbuf *, const gchar *);
+void quick_message(GtkWindow *, gchar *);
 
 #endif /* __FILTERSPANEL__ */

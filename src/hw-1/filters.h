@@ -38,6 +38,6 @@ GdkPixbuf *apply_filter_GPGPU(GdkPixbuf *, double *kernel, gint, gint, double,
 
 GdkPixbuf *apply_filter_service(GdkPixbuf *, FilterData *);
 
-void save_filtering_result(GdkPixbuf *, gchar *, gchar *, FilterData *);
+void apply_and_save_filter_service(GdkPixbuf *, gchar *, gchar *, FilterData *);
 
 #endif /* __FILTERS__ */

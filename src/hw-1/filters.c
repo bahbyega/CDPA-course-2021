@@ -280,7 +280,15 @@ GdkPixbuf *apply_filter_GPGPU(GdkPixbuf *pixbuf, double *kernel,
     return result;
 }
 
-
+/**
+ * Services that can be called for filter application.
+ * 
+ * Parameters:
+ *  src_pixbuf: a pixbuf data of an image
+ *  filter_data: a FilterData struct containing information about the filter
+ * 
+ * Returns: new pixbuf of filtering result
+ **/ 
 GdkPixbuf *apply_filter_service(GdkPixbuf *src_pixbuf,
                                 FilterData *filter_data)
 {
@@ -312,11 +320,21 @@ GdkPixbuf *apply_filter_service(GdkPixbuf *src_pixbuf,
     return out_pixbuf;
 }
 
-
-void save_filtering_result(GdkPixbuf *src_pixbuf,
-                            gchar *filename,
-                            gchar *extension,
-                            FilterData *filter_data)
+/**
+ * Services that can be called for filter application.
+ * 
+ * Parameters:
+ *  src_pixbuf: a pixbuf data of an image
+ *  filename: name of a file to be written
+ *  extension: extension of a file to be written
+ *  filter_data: a FilterData struct containing information about the filter
+ * 
+ * Outputs the message in console if new file was written.
+ **/ 
+void apply_and_save_filter_service(GdkPixbuf *src_pixbuf,
+                                    gchar *filename,
+                                    gchar *extension,
+                                    FilterData *filter_data)
 {
     GdkPixbuf *out_pixbuf = apply_filter_service(src_pixbuf, filter_data);
     gboolean   saved      = gdk_pixbuf_save(out_pixbuf, filename, extension, NULL, NULL);
