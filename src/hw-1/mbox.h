@@ -2,9 +2,10 @@
 #define __MBOX__
 
 #define MAX_PAYLOAD 32
-#define MSG_TYPE_IMG 2
-#define MSG_TYPE_GO 1
-#define MSG_TYPE_EOS 0
+
+#define MSG_TYPE_IMG 3
+#define MSG_TYPE_GO 2
+#define MSG_TYPE_EOS 1
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <pthread.h>
@@ -17,7 +18,7 @@ typedef struct msg {
 } msg_t;
 
 typedef struct mmBox {
-  msg_t Data;
+  msg_t Msg;
   sem_t NotFull;
   sem_t NotEmpty;
 } mbox_t;

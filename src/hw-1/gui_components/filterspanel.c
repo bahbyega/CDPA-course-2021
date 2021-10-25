@@ -381,7 +381,7 @@ void on_blur_folder_btn_click(GtkWidget *caller
         .kernel = &gaussian_blur_kernel_5x5[0][0]
     };
 
-    get_pixbufs_from_images_in_a_folder(gtk_entry_get_text(src_folder_entry),
+    parallel_folder_service(gtk_entry_get_text(src_folder_entry),
                                         gtk_entry_get_text(out_folder_entry),
                                         &filter_data);
     quick_message(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(src_folder_entry))), "Success");
@@ -406,7 +406,7 @@ void on_sharp_folder_btn_click(GtkWidget *caller
         .kernel = &sharpening_kernel_5x5[0][0]
     };
 
-    get_pixbufs_from_images_in_a_folder(gtk_entry_get_text(src_folder_entry),
+    parallel_folder_service(gtk_entry_get_text(src_folder_entry),
                                         gtk_entry_get_text(out_folder_entry),
                                         &filter_data);
     quick_message(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(src_folder_entry))), "Success");
@@ -431,7 +431,7 @@ void on_edges_folder_btn_click(GtkWidget *caller
         .kernel = &edges_kernel_5x5[0][0]
     };
 
-    get_pixbufs_from_images_in_a_folder(gtk_entry_get_text(src_folder_entry),
+    parallel_folder_service(gtk_entry_get_text(src_folder_entry),
                                         gtk_entry_get_text(out_folder_entry),
                                         &filter_data);
     quick_message(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(src_folder_entry))), "Success");
@@ -456,7 +456,7 @@ void on_mblur_folder_btn_click(GtkWidget *caller
         .kernel = &motionblur_kernel_9x9[0][0]
     };
 
-    get_pixbufs_from_images_in_a_folder(gtk_entry_get_text(src_folder_entry),
+    parallel_folder_service(gtk_entry_get_text(src_folder_entry),
                                         gtk_entry_get_text(out_folder_entry),
                                         &filter_data);
     quick_message(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(src_folder_entry))), "Success");
@@ -797,49 +797,172 @@ gchar *get_new_filename(const gchar *src_filename) {
 /**
  * Parses src_folder for images and calls filter services to save images' pixbufs in out_folder
  **/
-void get_pixbufs_from_images_in_a_folder(const gchar *src_folder, const gchar *out_folder, FilterData *filter_data)
+void parallel_folder_service(const gchar *src_folder, const gchar *out_folder, FilterData *filter_data)
 {
+    int numThreads = 3;
+    
+    mbox_t mailbox[numThreads];
+    pthread_t threadID[numThreads];
+
+    for(int i = 0; i < numThreads; i++) {
+		msg_init(&mailbox[i]);
+	}
+
+    struct loading_thread_args * l_struct = &(struct loading_thread_args) {
+        .src_folder = src_folder,
+        .img_loader = &mailbox[0],
+        .img_processor = &mailbox[1]
+    };
+    struct processing_thread_args * p_struct = &(struct processing_thread_args) {
+        .filter_data = filter_data,
+        .img_processor = &mailbox[1],
+        .img_saver = &mailbox[2]
+    };
+    struct saving_thread_args * s_struct = &(struct saving_thread_args) {
+        .out_folder = out_folder,
+        .img_saver = &mailbox[2]
+    };
+
+    pthread_create(&threadID[0], NULL, img_loading, (void *)l_struct);
+    pthread_create(&threadID[1], NULL, img_processing, (void *)p_struct);
+    pthread_create(&threadID[2], NULL, img_saving, (void *)s_struct);
+
+    for(int i = 0; i < numThreads; i++) {
+		pthread_join(threadID[i],NULL);
+		sem_destroy(&mailbox[i].NotFull);
+		sem_destroy(&mailbox[i].NotEmpty);
+	}
+}
+
+
+void *img_loading(void *ptr)
+{
+    struct loading_thread_args *args = (struct loading_thread_args *)ptr;
+    const gchar *src_folder = args->src_folder;
+    mbox_t* img_loader      = args->img_loader;
+    mbox_t *img_processor   = args->img_processor;
+
+    // opening directory
     DIR *dp;
     struct dirent *ep;
     gchar filename[200];
     GdkPixbuf *src_pixbuf;
 
     dp = opendir(src_folder);
+    
+    // mailbox of img_loader
+    msg_t msg = {0, MSG_TYPE_GO, NULL};
+
     if (dp != NULL)
     {
-        while ((ep = readdir(dp)))
+        while((ep = readdir(dp)))
         {
-            if (ep->d_type == DT_REG || ep->d_type == DT_UNKNOWN)
-            {
-                if (strcmp(".", ep->d_name) != 0 && strcmp("..", ep->d_name) != 0)
-                {
-                    gchar *extension = strrchr(ep->d_name, '.') + 1;
-                    if (strcmp("bmp", extension) == 0 || 
-                        strcmp("png", extension) == 0 ||
-                        strcmp("jpg", extension) == 0)
-                    {
-                        strcpy(filename, src_folder);
-                        strcat(filename, "/");
-                        strcat(filename, ep->d_name);
-                        
-                        src_pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, -1, -1, TRUE, NULL);
+            printf("Reading %s\n", ep->d_name);
+            msg_receive(img_loader, &msg);
 
-                        // if out folder specified
-                        if (strcmp("", out_folder) != 0) 
-                        {
-                            strcpy(filename, out_folder);
-                            strcat(filename, "/");
-                            strcat(filename, ep->d_name);
-                        }
-                        
-                        gchar *new_filename = get_new_filename(filename);
-                        apply_and_save_filter_service(src_pixbuf, new_filename, extension, filter_data);
-                    }
-                }
+            if (msg.type == MSG_TYPE_EOS)
+            {
+                int tid = pthread_self();
+                msg_t eos_msg = {tid, MSG_TYPE_EOS, NULL};
+
+                printf("Image loader is ready to finish!\n");
+                msg_send(img_processor, &eos_msg);
+                printf("Image loader is finished!\n");
+            }
+
+            else if (msg.type == MSG_TYPE_GO)
+            {
+                printf("Loading file!\n");
+                
+                // load pixbuf here
+                int tid = pthread_self();
+                GdkPixbuf *pixbuf;
+                
+                msg_t img_msg = {tid, MSG_TYPE_IMG, pixbuf};
+                msg_t self_msg = {tid, MSG_TYPE_GO, NULL};
+
+                msg_send(img_loader, &self_msg);
+                msg_send(img_processor, &img_msg);
             }
         }
-        (void) closedir(dp);
     }
-    else
-        perror("Couldn't open the directory");
+}
+
+void *img_processing(void *ptr)
+{
+    struct processing_thread_args *args = (struct processing_thread_args *)ptr;
+    FilterData *filter_data = args->filter_data;
+    mbox_t *img_processor   = args->img_processor;
+    mbox_t *img_saver       = args->img_saver;
+
+    msg_t msg = {0, 0, NULL};
+
+    while(1)
+    {
+        msg_receive(img_processor, &msg);
+        printf("In proccesor\n");
+
+        if (msg.type == MSG_TYPE_EOS)
+        {
+            int tid = pthread_self();
+            msg_t eos_msg = {tid, MSG_TYPE_EOS, NULL};
+
+            printf("Image processor is ready to finish!\n");
+            msg_send(img_saver, &eos_msg);
+            printf("Image loader is finished!\n");
+            break;
+        }
+
+        else if (msg.type == MSG_TYPE_IMG)
+        {
+            printf("Loading file!\n");
+            
+            // apply filter here
+            int tid = pthread_self();
+            GdkPixbuf *pixbuf;
+            
+            msg_t img_msg = {tid, MSG_TYPE_IMG, pixbuf};
+            msg_send(img_saver, &img_msg);
+        }
+
+    }
+}
+
+void *img_saving(void *ptr)
+{
+    struct saving_thread_args *args = (struct saving_thread_args *)ptr;
+    const gchar *out_folder = args->out_folder;
+    mbox_t *img_saver       = args->img_saver;
+
+    msg_t msg = {0, 0, NULL};
+
+    while(1)
+    {
+        msg_receive(img_saver, &msg);
+        printf("In saver\n");
+
+        if (msg.type == MSG_TYPE_EOS)
+        {
+            int tid = pthread_self();
+            msg_t eos_msg = {tid, MSG_TYPE_EOS, NULL};
+
+            printf("Image processor is ready to finish!\n");
+            msg_send(img_saver, &eos_msg);
+            printf("Image loader is finished!\n");
+            break;
+        }
+
+        else if (msg.type == MSG_TYPE_IMG)
+        {
+            printf("Loading file!\n");
+            
+            // apply filter here
+            int tid = pthread_self();
+            GdkPixbuf *pixbuf;
+            
+            msg_t img_msg = {tid, MSG_TYPE_IMG, pixbuf};
+            msg_send(img_saver, &img_msg);
+        }
+
+    }
 }
