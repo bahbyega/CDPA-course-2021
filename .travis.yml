@@ -55,3 +55,18 @@ jobs:
       script:
         - cd reports/LABasedGraphAlgorithms
         - make report
+
+    - language: generic
+      sudo: required
+
+      before_install:
+        - sudo apt-get -qq update
+        - sudo apt-get install -y texlive-base texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-lang-cyrillic texlive-science
+        - python -m pip install -U pip
+        - python -m pip install -U matplotlib
+        - python -m pip install -U pandas
+        - python -m pip install -U numpy
+      
+      script:
+        - cd reports/ImageFilteringApp
+        - make report
