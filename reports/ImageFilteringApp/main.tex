@@ -1,0 +1,66 @@
+\documentclass[a4paper,12pt]{article} 
+
+% Language, endcoding, font
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english,russian]{babel}
+
+% Indentation, paragraphs, line spacing
+\usepackage[left=30mm, top=20mm, right=15mm, bottom=20mm,nohead, includefoot,footskip=35pt]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage[pdftex]{graphicx}
+\usepackage[colorlinks=false,unicode=true]{hyperref}
+\usepackage[export]{adjustbox}
+\usepackage{subcaption}
+\usepackage{algorithm}
+
+% Table of contents
+\usepackage{tocloft}
+
+\newcommand{\specialsection}[1]{
+    \phantomsection
+    \bigskip\smallskip\hspace{-12.5mm}
+    \normalfont\fontsize{18}{18}\textbf{#1}
+    \par\bigskip\normalfont\normalsize
+    \addcontentsline{toc}{section}{#1}
+}
+
+\usepackage{titlesec}
+
+\titleformat{\section}
+{\normalfont\fontsize{18}{18}\bfseries}{\thesection. \hskip-1em}{1em}{}
+% Подраздел: 16pt
+\titleformat{\subsection}
+{\normalfont\fontsize{16}{16}\bfseries}{\thesubsection}{1em}{}
+
+\renewcommand{\cfttoctitlefont}{\hspace{0.31\textwidth} \bfseries\Large}
+\renewcommand{\cftbeforetoctitleskip}{-1em}
+\renewcommand{\cftsecpresnum}{\space}
+\newlength\mylength
+\settowidth\mylength{\cftsecpresnum}
+\addtolength\cftsecnumwidth{\mylength}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsecaftersnum}{.}
+\renewcommand{\cftsubsecaftersnum}{.}
+\setlength{\cftsubsecindent}{2.68em}
+\setlength{\cftbeforesecskip}{4pt}
+
+\renewcommand{\cftsecpagefont}{\normalfont}
+
+
+\begin{document}
+\input{titlepage.tex}
+\input{tableofcontents.tex}
+\input{introduction.tex}
+\input{implementationdetails.tex}
+\input{evaluation.tex}
+\input{conclusion.tex}
+
+\bibliographystyle{abbrv}
+\bibliography{bibliography}
+
+\end{document}
