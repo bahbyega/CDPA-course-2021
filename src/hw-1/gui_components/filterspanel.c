@@ -867,7 +867,7 @@ void *img_loading(void *ptr)
                         strcat(filename, ep->d_name);
                         src_pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, -1, -1, TRUE, NULL);
 
-                        msg_t img_msg = {tid, MSG_TYPE_IMG, filename, src_pixbuf};
+                        msg_t img_msg = {tid, MSG_TYPE_IMG, ep->d_name, src_pixbuf};
                         msg_send(img_processor, &img_msg);
                     }
                 }
@@ -936,7 +936,7 @@ void *img_saving(void *ptr)
             strcat(filename, "/");
             strcat(filename, msg.filename);
             gchar *new_filename = get_new_filename(filename);
-
+            
             gboolean saved = gdk_pixbuf_save(msg.pixbuf, new_filename, extension, NULL, NULL);
             if (saved) g_print("Wrote new file: %s\n", new_filename);
         }
