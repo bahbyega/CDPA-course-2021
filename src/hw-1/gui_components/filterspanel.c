@@ -795,7 +795,7 @@ gchar *get_new_filename(const gchar *src_filename) {
 
 
 /**
- * Parses src_folder for images and calls filter services to save images' pixbufs in out_folder
+ * Assignes a thread to a mailbox and loads them.
  **/
 void parallel_folder_service(const gchar *src_folder, const gchar *out_folder, FilterData *filter_data)
 {
@@ -839,52 +839,43 @@ void *img_loading(void *ptr)
 {
     struct loading_thread_args *args = (struct loading_thread_args *)ptr;
     const gchar *src_folder = args->src_folder;
-    mbox_t* img_loader      = args->img_loader;
     mbox_t *img_processor   = args->img_processor;
 
-    // opening directory
+    int tid = pthread_self();
+
     DIR *dp;
     struct dirent *ep;
     gchar filename[200];
     GdkPixbuf *src_pixbuf;
 
     dp = opendir(src_folder);
-    
-    // mailbox of img_loader
-    msg_t msg = {0, MSG_TYPE_GO, NULL};
-
     if (dp != NULL)
     {
         while((ep = readdir(dp)))
         {
-            printf("Reading %s\n", ep->d_name);
-            msg_receive(img_loader, &msg);
-
-            if (msg.type == MSG_TYPE_EOS)
+            if (ep->d_type == DT_REG || ep->d_type == DT_UNKNOWN)
             {
-                int tid = pthread_self();
-                msg_t eos_msg = {tid, MSG_TYPE_EOS, NULL};
+                if (strcmp(".", ep->d_name) != 0 && strcmp("..", ep->d_name) != 0)
+                {
+                    gchar *extension = strrchr(ep->d_name, '.') + 1;
+                    if (strcmp("bmp", extension) == 0 || 
+                        strcmp("png", extension) == 0 ||
+                        strcmp("jpg", extension) == 0)
+                    {
+                        strcpy(filename, src_folder);
+                        strcat(filename, "/");
+                        strcat(filename, ep->d_name);
+                        src_pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, -1, -1, TRUE, NULL);
 
-                printf("Image loader is ready to finish!\n");
-                msg_send(img_processor, &eos_msg);
-                printf("Image loader is finished!\n");
-            }
-
-            else if (msg.type == MSG_TYPE_GO)
-            {
-                printf("Loading file!\n");
-                
-                // load pixbuf here
-                int tid = pthread_self();
-                GdkPixbuf *pixbuf;
-                
-                msg_t img_msg = {tid, MSG_TYPE_IMG, pixbuf};
-                msg_t self_msg = {tid, MSG_TYPE_GO, NULL};
-
-                msg_send(img_loader, &self_msg);
-                msg_send(img_processor, &img_msg);
+                        msg_t img_msg = {tid, MSG_TYPE_IMG, filename, src_pixbuf};
+                        msg_send(img_processor, &img_msg);
+                    }
+                }
             }
         }
+        (void) closedir(dp);
+        msg_t eos_msg = {tid, MSG_TYPE_EOS, NULL, NULL};
+        msg_send(img_processor, &eos_msg);
     }
 }
 
@@ -894,34 +885,25 @@ void *img_processing(void *ptr)
     FilterData *filter_data = args->filter_data;
     mbox_t *img_processor   = args->img_processor;
     mbox_t *img_saver       = args->img_saver;
-
-    msg_t msg = {0, 0, NULL};
+    
+    int tid = pthread_self();
+    msg_t msg = {0, 0, NULL, NULL};
 
     while(1)
     {
         msg_receive(img_processor, &msg);
-        printf("In proccesor\n");
 
         if (msg.type == MSG_TYPE_EOS)
         {
-            int tid = pthread_self();
-            msg_t eos_msg = {tid, MSG_TYPE_EOS, NULL};
-
-            printf("Image processor is ready to finish!\n");
+            msg_t eos_msg = {tid, MSG_TYPE_EOS, NULL, NULL};
             msg_send(img_saver, &eos_msg);
-            printf("Image loader is finished!\n");
             break;
         }
 
-        else if (msg.type == MSG_TYPE_IMG)
-        {
-            printf("Loading file!\n");
-            
-            // apply filter here
-            int tid = pthread_self();
-            GdkPixbuf *pixbuf;
-            
-            msg_t img_msg = {tid, MSG_TYPE_IMG, pixbuf};
+        if (msg.type == MSG_TYPE_IMG)
+        {            
+            GdkPixbuf *out_pixbuf = apply_filter_service(msg.pixbuf, filter_data);
+            msg_t img_msg = {tid, MSG_TYPE_IMG, msg.filename, out_pixbuf};
             msg_send(img_saver, &img_msg);
         }
 
@@ -934,35 +916,31 @@ void *img_saving(void *ptr)
     const gchar *out_folder = args->out_folder;
     mbox_t *img_saver       = args->img_saver;
 
-    msg_t msg = {0, 0, NULL};
+    int tid = pthread_self();
+    msg_t msg = {0, 0, NULL, NULL};
 
     while(1)
     {
         msg_receive(img_saver, &msg);
-        printf("In saver\n");
 
         if (msg.type == MSG_TYPE_EOS)
         {
-            int tid = pthread_self();
-            msg_t eos_msg = {tid, MSG_TYPE_EOS, NULL};
-
-            printf("Image processor is ready to finish!\n");
+            msg_t eos_msg = {tid, MSG_TYPE_EOS, NULL, NULL};
             msg_send(img_saver, &eos_msg);
-            printf("Image loader is finished!\n");
             break;
         }
 
-        else if (msg.type == MSG_TYPE_IMG)
+        if (msg.type == MSG_TYPE_IMG)
         {
-            printf("Loading file!\n");
-            
-            // apply filter here
-            int tid = pthread_self();
-            GdkPixbuf *pixbuf;
-            
-            msg_t img_msg = {tid, MSG_TYPE_IMG, pixbuf};
-            msg_send(img_saver, &img_msg);
-        }
+            gchar filename[200];
+            gchar *extension = strrchr(msg.filename, '.') + 1;
+            strcpy(filename, out_folder);
+            strcat(filename, "/");
+            strcat(filename, msg.filename);
+            gchar *new_filename = get_new_filename(filename);
 
+            gboolean saved = gdk_pixbuf_save(msg.pixbuf, new_filename, extension, NULL, NULL);
+            if (saved) g_print("Wrote new file: %s\n", new_filename);
+        }
     }
 }

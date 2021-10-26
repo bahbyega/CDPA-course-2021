@@ -4,7 +4,7 @@ msg_t  msg_init(mbox_t *MailBox)
 {
      sem_init(&(MailBox->NotFull), PTHREAD_PROCESS_PRIVATE, 0);
      sem_init(&(MailBox->NotEmpty), PTHREAD_PROCESS_PRIVATE, 1);
-     msg_t msg = {0, 0, NULL};
+     msg_t msg = {0, 0, NULL, NULL};
      MailBox->Msg = msg;
      return msg;
 }

@@ -14,6 +14,7 @@
 typedef struct msg {
   int iFrom;
   int type;
+  gchar *filename;
   GdkPixbuf *pixbuf; // message data
 } msg_t;
 
