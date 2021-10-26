@@ -925,8 +925,6 @@ void *img_saving(void *ptr)
 
         if (msg.type == MSG_TYPE_EOS)
         {
-            msg_t eos_msg = {tid, MSG_TYPE_EOS, NULL, NULL};
-            msg_send(img_saver, &eos_msg);
             break;
         }
 
