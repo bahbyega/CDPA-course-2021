@@ -279,3 +279,65 @@ GdkPixbuf *apply_filter_GPGPU(GdkPixbuf *pixbuf, double *kernel,
 
     return result;
 }
+
+/**
+ * Services that can be called for filter application.
+ * 
+ * Parameters:
+ *  src_pixbuf: a pixbuf data of an image
+ *  filter_data: a FilterData struct containing information about the filter
+ * 
+ * Returns: new pixbuf of filtering result
+ **/ 
+GdkPixbuf *apply_filter_service(GdkPixbuf *src_pixbuf,
+                                FilterData *filter_data)
+{
+    GdkPixbuf *out_pixbuf;
+    
+    if (filter_data->use_gpu_flag)
+    {
+        for (gint i = 0; i < filter_data->apply_times; i++)
+        {
+            out_pixbuf = apply_filter_GPGPU(src_pixbuf,
+                                            filter_data->kernel,
+                                            filter_data->ker_width,
+                                            filter_data->ker_width,
+                                            filter_data->factor,
+                                            filter_data->bias);
+        }
+    } else {
+        for (gint i = 0; i < filter_data->apply_times; i++)
+        {
+            out_pixbuf = apply_filter_parallel(src_pixbuf,
+                                               filter_data->kernel,
+                                               filter_data->ker_width,
+                                               filter_data->ker_width,
+                                               filter_data->factor,
+                                               filter_data->bias);
+        }
+    }
+    
+    return out_pixbuf;
+}
+
+/**
+ * Services that can be called for filter application.
+ * 
+ * Parameters:
+ *  src_pixbuf: a pixbuf data of an image
+ *  filename: name of a file to be written
+ *  extension: extension of a file to be written
+ *  filter_data: a FilterData struct containing information about the filter
+ * 
+ * Outputs the message in console if new file was written.
+ **/ 
+void apply_and_save_filter_service(GdkPixbuf *src_pixbuf,
+                                    gchar *filename,
+                                    gchar *extension,
+                                    FilterData *filter_data)
+{
+    GdkPixbuf *out_pixbuf = apply_filter_service(src_pixbuf, filter_data);
+    gboolean   saved      = gdk_pixbuf_save(out_pixbuf, filename, extension, NULL, NULL);
+        
+    if (saved) g_print("Wrote new file: %s\n", filename);
+}
